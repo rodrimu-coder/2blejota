@@ -224,14 +224,15 @@
   function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
   function tennisStr(a,b){
-    const map = ["0","15","30","40"];
-    if (a>=3 && b>=3){
-      if (a===b) return "GP"; // Punto de Oro
-      // con punto de oro, no hay ventaja: el que gana tras GP se queda con el juego
-      return map[Math.min(a,3)]+"–"+map[Math.min(b,3)];
-    }
-    return (map[a]||"40")+"–"+(map[b]||"40");
-  }
+  // Mapea a marcador tenis clásico y soporta valores >4 sin romper UI
+  const map = ["0","15","30","40"];
+  // GP: igualdad de 40-40
+  if (a >= 3 && b >= 3 && a === b) return "GP";
+  // Mostrar 40 en adelante si alguien superó 3
+  const sa = (a >= 3) ? "40" : map[a];
+  const sb = (b >= 3) ? "40" : map[b];
+  return ⁠ ${sa}–${sb} ⁠;
+}
 
   function teamOf(playerId){ return (playerId[0]==="A") ? "A" : "B"; }
   function partnerOf(playerId){
@@ -300,44 +301,51 @@
   }
 
   // --------- Reglas de juego ----------
-  function pointForTeam(team){
-    if (team==="A") state.score.ptsA++; else state.score.ptsB++;
-    const a = state.score.ptsA, b = state.score.ptsB;
+ function pointForTeam(team){
+  if (team === "A") state.score.ptsA++; else state.score.ptsB++;
+  const a = state.score.ptsA, b = state.score.ptsB;
 
-    // ¿Punto de oro?
-    const golden = (a>=3 && b>=3 && a===b); // ambos 40-40
-    if (golden){
-      // solo muestra GP; el siguiente pointForTeam decidirá el juego
-      return;
-    }
-    // Si uno gana tras GP o llega a 4 sin GP, cierra juego:
-    const winA = (a>=4) || (a>3 && b===3); // con no-adv, tras GP el que suma gana
-    const winB = (b>=4) || (b>3 && a===3);
-    if (winA || winB){
-      if (winA){ state.score.gamesA++; } else { state.score.gamesB++; }
-      resetGamePoints();
-      nextServer();
-      checkSetEnd();
-    }
+  // ¿Llegamos a GP (40–40)? No cerramos aún, solo mostramos GP.
+  if (a >= 3 && b >= 3 && a === b){
+    return; // siguiente punto definirá el juego
   }
+
+  // ¿Cierra juego?
+  // Regla robusta sin ventaja:
+  // - Si alguien tiene >=4, cierra.
+  // - Si ambos tienen >=3 y NO están iguales, el que quedó arriba cierra.
+  let closeGame = false, winner = null;
+  if (a >= 4 || b >= 4) {
+    closeGame = true;
+    winner = (a > b) ? "A" : "B";
+  } else if (a >= 3 && b >= 3 && a !== b) {
+    closeGame = true;
+    winner = (a > b) ? "A" : "B";
+  }
+
+  if (closeGame){
+    if (winner === "A") state.score.gamesA++; else state.score.gamesB++;
+    resetGamePoints();
+    nextServer();
+    checkSetEnd();
+  }
+}
 
   function checkSetEnd(){
-    const gA = state.score.gamesA, gB = state.score.gamesB;
-    // sin tiebreak: diferencia de 2
-    if ((gA>=6 || gB>=6) && Math.abs(gA-gB)>=2){
-      if (gA>gB) state.score.setsA++; else state.score.setsB++;
-      // reset juegos para nuevo set (si quedan sets por jugar)
-      const targetSets = Math.ceil(state.meta.setFormat/2);
-      state.score.gamesA = 0; state.score.gamesB = 0;
-      resetGamePoints();
+  const gA = state.score.gamesA, gB = state.score.gamesB;
+  const need = 6; // juegos para set
+  // Sin tiebreak: diferencia de 2
+  if ((gA >= need || gB >= need) && Math.abs(gA - gB) >= 2){
+    if (gA > gB) state.score.setsA++; else state.score.setsB++;
+    state.score.gamesA = 0; state.score.gamesB = 0;
+    resetGamePoints();
 
-      // ¿Partido termina?
-      if (state.score.setsA===targetSets || state.score.setsB===targetSets){
-        state.meta.finished = true;
-      }
+    const targetSets = Math.ceil(state.meta.setFormat / 2);
+    if (state.score.setsA === targetSets || state.score.setsB === targetSets){
+      state.meta.finished = true;
     }
   }
-
+}
   // --------- Registro de un punto (botones) ---------
   function recordPoint(playerId, type){
     if (!state.meta.started || state.meta.finished) return;
