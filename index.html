@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>doblejotaenlared · Marcador Pádel con Punto de Oro</title>
+<title>doblejotaenlared · Marcador Pádel (punto de oro)</title>
 <style>
   :root{
     --bg:#0f172a;--panel:#111827;--muted:#94a3b8;--accent:#22c55e;--danger:#ef4444;--btn:#1f2937;--ring:#22d3ee;
@@ -11,7 +11,7 @@
   *{box-sizing:border-box}
   body{margin:0;background:linear-gradient(180deg,#0b1223,#0f172a);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
   .wrap{max-width:1100px;margin:auto;padding:16px}
-  .card{background:rgba(17,24,39,.8);border:1px solid #111827;border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .card{background:rgba(17,24,39,.85);border:1px solid #111827;border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
   h1{margin:4px 0 12px;font-size:20px;letter-spacing:.3px}
   h2{margin:8px 0;font-size:16px;color:#cbd5e1}
   .row{display:grid;gap:12px}
@@ -20,14 +20,12 @@
   input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #1f2937;background:#0b1223;color:#e5e7eb;outline:none}
   input:focus,select:focus{border-color:var(--ring);box-shadow:0 0 0 3px rgba(34,211,238,.25)}
   .btn{cursor:pointer;border:1px solid #253042;background:linear-gradient(180deg,#1f2937,#111827);color:#e5e7eb;padding:12px 14px;border-radius:12px;font-weight:600}
-  .btn:hover{filter:brightness(1.1)}
-  .btn:active{transform:translateY(1px)}
+  .btn:hover{filter:brightness(1.1)} .btn:active{transform:translateY(1px)}
   .btn.acc{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#166534}
   .btn.dng{background:linear-gradient(180deg,#ef4444,#b91c1c);border-color:#7f1d1d}
   .btn.ghost{background:transparent;border-color:#334155}
   .grid{display:grid;gap:12px}
   .grid.cols-2{grid-template-columns:1fr 1fr}
-  .grid.cols-4{grid-template-columns:repeat(4,1fr)}
   .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#0b1223;border:1px solid #334155;color:#cbd5e1;font-size:12px}
   .score{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px dashed #334155;padding:10px;border-radius:12px}
   .big{font-size:28px;font-weight:800;letter-spacing:.5px}
@@ -35,14 +33,12 @@
   .team h3{margin:0 0 6px;font-size:15px;color:#a5b4fc}
   .player{display:flex;align-items:center;gap:8px;margin-bottom:8px}
   .player input{flex:1}
-  .pill{border:1px solid #334155;padding:6px 10px;border-radius:999px;background:#0b1223}
   .tiny{font-size:12px;color:#94a3b8}
   .tabbar{display:flex;gap:8px;flex-wrap:wrap}
   .tabbar .btn{padding:8px 10px}
   .log{max-height:220px;overflow:auto;border:1px solid #253042;border-radius:12px;background:#0b1223}
   .log table{width:100%;border-collapse:collapse;font-size:13px}
   .log th,.log td{padding:8px 10px;border-bottom:1px solid #1f2937;white-space:nowrap}
-  .muted{color:#94a3b8}
   .help{font-size:12px;color:#9ca3af;margin-top:6px}
   .sep{height:1px;background:#1f2937;margin:10px 0}
   .kpi{display:flex;gap:8px;flex-wrap:wrap}
@@ -55,9 +51,10 @@
 <div class="wrap">
   <div class="card">
     <h1>🎾 doblejotaenlared — Marcador de Pádel (punto de oro)</h1>
-    <div class="help">Registra el partido con 4 jugadoras (2 vs 2). Puntuación tipo tenis con <b>punto de oro</b> a 40–40. Marca cada punto por jugadora: 
-      <b>GG</b> (Golpe Ganador), <b>SG</b> (Saque Ganador), <b>ENF</b> (Error No Forzado), <b>FE</b> (Fallo/Forzado).
-      Guarda los últimos 4 partidos en tu dispositivo y expórtalos a CSV para Excel.
+    <div class="help">
+      4 jugadoras (2 vs 2). Tenis con <b>punto de oro</b> a 40–40 (GP): la siguiente pelota define el juego.
+      Registra por jugadora: <b>GG</b> (Golpe Ganador), <b>SG</b> (Saque Ganador), <b>ENF</b> (Error No Forzado), <b>FE</b> (Error Forzado).
+      Guarda los últimos 4 partidos y exporta CSV para Excel.
     </div>
 
     <!-- CONFIGURACIÓN -->
@@ -79,16 +76,15 @@
       <div>
         <label class="tiny">Orden de servicio (quién saca primero y rotación)</label>
         <select id="serveOrder"></select>
-        <div class="help">Rotación automática por juegos: Servidor actual → siguiente de la lista. (Ej.: A1 → B1 → A2 → B2 → A1 ...)</div>
+        <div class="help">Rotación por juegos: Servidor actual → siguiente de la lista (A1 → B1 → A2 → B2 → ...).</div>
       </div>
       <div>
         <label class="tiny">Formato de sets</label>
         <select id="setFormat">
-          <option value="1">1 set (6 juegos, diferencia 2, sin tiebreak)</option>
-          <option value="3" selected>Mejor de 3 sets (6 juegos, diferencia 2, sin tiebreak)</option>
-          <option value="5">Mejor de 5 sets (6 juegos, diferencia 2, sin tiebreak)</option>
+          <option value="1">1 set (6 juegos, +2, sin tiebreak)</option>
+          <option value="3" selected>Mejor de 3 sets (6 juegos, +2, sin tiebreak)</option>
+          <option value="5">Mejor de 5 sets (6 juegos, +2, sin tiebreak)</option>
         </select>
-        <div class="help">Simplificado: sin tiebreak a 6–6 (debe haber +2). Puedes cerrar el set manualmente si prefieres.</div>
       </div>
     </div>
 
@@ -108,29 +104,29 @@
         <h3 id="nameTeamA">Equipo A</h3>
         <div class="kpi">
           <div class="box"><div class="tiny">Sets</div><div id="setsA" class="n">0</div></div>
-          <div class="box"><div class="tiny">Juegos (set actual)</div><div id="gamesA" class="n">0</div></div>
-          <div class="box"><div class="tiny">Puntos juego</div><div id="pointsA" class="n">0</div></div>
+          <div class="box"><div class="tiny">Juegos (set)</div><div id="gamesA" class="n">0</div></div>
+          <div class="box"><div class="tiny">Puntos (juego)</div><div id="pointsA" class="n">0</div></div>
         </div>
       </div>
       <div class="card" style="background:#0b1223;border-color:#334155">
         <div class="score">
           <div><span class="tiny">Servidor</span><div class="badge" id="serverNow">-</div></div>
           <div class="big" id="tennisScore">0 — 0</div>
-          <div><span class="tiny">Estado</span><div class="badge" id="stateNow">Juego en curso</div></div>
+          <div><span class="tiny">Estado</span><div class="badge" id="stateNow">Listo</div></div>
         </div>
-        <div class="help">A 40–40 se activa <b>Punto de Oro</b>: la próxima pelota define el juego.</div>
+        <div class="help">A 40–40 se muestra <b>GP</b> (punto de oro): el siguiente punto define el juego.</div>
       </div>
       <div class="team">
         <h3 id="nameTeamB">Equipo B</h3>
         <div class="kpi">
           <div class="box"><div class="tiny">Sets</div><div id="setsB" class="n">0</div></div>
-          <div class="box"><div class="tiny">Juegos (set actual)</div><div id="gamesB" class="n">0</div></div>
-          <div class="box"><div class="tiny">Puntos juego</div><div id="pointsB" class="n">0</div></div>
+          <div class="box"><div class="tiny">Juegos (set)</div><div id="gamesB" class="n">0</div></div>
+          <div class="box"><div class="tiny">Puntos (juego)</div><div id="pointsB" class="n">0</div></div>
         </div>
       </div>
     </div>
 
-    <!-- BOTONES DE REGISTRO DE PUNTOS -->
+    <!-- BOTONES DE REGISTRO -->
     <h2 style="margin-top:12px">3) Registrar punto por jugadora</h2>
     <div class="grid cols-2">
       <div class="team">
@@ -163,7 +159,7 @@
       </div>
     </div>
 
-    <!-- RESÚMENES RÁPIDOS -->
+    <!-- RESÚMENES -->
     <div class="row cols-2" style="margin-top:12px">
       <div class="team">
         <h3>Estadísticas por jugadora</h3>
@@ -173,95 +169,99 @@
         <h3>Historial del partido</h3>
         <div class="log">
           <table id="tblLog">
-            <thead><tr><th>#</th><th>Ganador</th><th>Tipo</th><th>Equipo</th><th>Marcador juego</th><th>Servidor</th></tr></thead>
+            <thead><tr><th>#</th><th>Evento</th><th>Tipo</th><th>Equipo</th><th>Marcador</th><th>Servidor</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
         <div class="tabbar" style="margin-top:8px">
           <button class="btn" id="btnExport">Exportar CSV</button>
-          <button class="btn ghost" id="btnSave">Guardar en historial (últimos 4)</button>
+          <button class="btn ghost" id="btnSave">Guardar en historial (máx 4)</button>
         </div>
       </div>
     </div>
 
-    <!-- HISTORIAL GUARDADO -->
-    <h2 style="margin-top:12px">4) Últimos 4 partidos guardados en este dispositivo</h2>
+    <!-- HISTORIAL -->
+    <h2 style="margin-top:12px">4) Últimos 4 partidos guardados</h2>
     <div class="team">
       <div id="savedList" class="help">No hay partidos guardados todavía.</div>
     </div>
 
-    <footer>© doblejotaenlared · funciona offline (localStorage). Si borras datos del navegador, se pierde el historial.</footer>
+    <footer>© doblejotaenlared · offline (localStorage). Borrar datos del navegador elimina el historial.</footer>
   </div>
 </div>
 
 <script>
 (function(){
-  // --------- Estado del partido ---------
+  // ---------- Estado ----------
   const state = {
     meta:{ started:false, finished:false, setFormat:3, createdAt:null, id:null },
-    players:{
-      A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"}
-    },
-    serveOrder:[], // Array de IDs: ["A1","B1","A2","B2"]
-    serveIndex:0,  // índice del servidor actual en serveOrder
-    score:{
-      setsA:0, setsB:0,
-      gamesA:0, gamesB:0,
-      ptsA:0, ptsB:0 // 0..; a 3-3 (40-40) => punto de oro
-    },
-    stats:{ // por jugadora
-      A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0},
-      B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0}
-    },
-    log:[], // [{n, winnerPlayer, type, winnerTeam, gameStr, server}]
-    undoStack:[] // copia profunda del estado para deshacer
+    players:{ A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"} },
+    serveOrder:["A1","B1","A2","B2"],
+    serveIndex:0,
+    score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
+    stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
+    log:[],
+    undoStack:[]
   };
 
-  // --------- Helpers UI ---------
-  const $ = sel => document.querySelector(sel);
-  const $$ = sel => document.querySelectorAll(sel);
+  // ---------- Utilidades ----------
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const deepClone = o => JSON.parse(JSON.stringify(o));
+  const teamOf = id => id[0]==="A" ? "A" : "B";
+  const partnerOf = id => id==="A1"?"A2":id==="A2"?"A1":id==="B1"?"B2":"B1";
 
-  function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function syncNamesFromInputs(){
+    state.players.A1.name = $("#pA1").value.trim() || "A1";
+    state.players.A2.name = $("#pA2").value.trim() || "A2";
+    state.players.B1.name = $("#pB1").value.trim() || "B1";
+    state.players.B2.name = $("#pB2").value.trim() || "B2";
+  }
 
   function tennisStr(a,b){
-  // Mapea a marcador tenis clásico y soporta valores >4 sin romper UI
-  const map = ["0","15","30","40"];
-  // GP: igualdad de 40-40
-  if (a >= 3 && b >= 3 && a === b) return "GP";
-  // Mostrar 40 en adelante si alguien superó 3
-  const sa = (a >= 3) ? "40" : map[a];
-  const sb = (b >= 3) ? "40" : map[b];
-  return ⁠ ${sa}–${sb} ⁠;
-}
-
-  function teamOf(playerId){ return (playerId[0]==="A") ? "A" : "B"; }
-  function partnerOf(playerId){
-    if (playerId==="A1") return "A2";
-    if (playerId==="A2") return "A1";
-    if (playerId==="B1") return "B2";
-    return "B1";
+    // Mapea robusto: soporta valores >4 sin romper UI
+    const map = ["0","15","30","40"];
+    if (a >= 3 && b >= 3 && a === b) return "GP"; // 40-40
+    const sa = (a >= 3) ? "40" : map[a] || "40";
+    const sb = (b >= 3) ? "40" : map[b] || "40";
+    return `${sa} — ${sb}`;
   }
 
-  function serverName(){
+  const serverName = () => {
     const id = state.serveOrder[state.serveIndex] || "-";
-    return (state.players[id]?.name || id);
-  }
-
-  function nextServer(){
+    return state.players[id]?.name || id;
+  };
+  const nextServer = () => {
+    if (!state.serveOrder.length) state.serveOrder = ["A1","B1","A2","B2"];
     state.serveIndex = (state.serveIndex + 1) % state.serveOrder.length;
-  }
+  };
+  const resetGamePoints = () => { state.score.ptsA = 0; state.score.ptsB = 0; };
 
-  function resetGamePoints(){
-    state.score.ptsA = 0;
-    state.score.ptsB = 0;
+  // ---------- UI ----------
+  function updateServeOrderOptions(){
+    const n = {
+      A1: state.players.A1.name, A2: state.players.A2.name,
+      B1: state.players.B1.name, B2: state.players.B2.name
+    };
+    const options = [
+      ["A1,B1,A2,B2", `A1 (${n.A1}) → B1 (${n.B1}) → A2 (${n.A2}) → B2 (${n.B2})`],
+      ["A1,B2,A2,B1", `A1 (${n.A1}) → B2 (${n.B2}) → A2 (${n.A2}) → B1 (${n.B1})`],
+      ["B1,A1,B2,A2", `B1 (${n.B1}) → A1 (${n.A1}) → B2 (${n.B2}) → A2 (${n.A2})`],
+      ["B2,A1,B1,A2", `B2 (${n.B2}) → A1 (${n.A1}) → B1 (${n.B1}) → A2 (${n.A2})`],
+    ];
+    $("#serveOrder").innerHTML = options.map(([v,txt])=> `<option value="${v}">${txt}</option>`).join("");
+    // Mantener selección si existía
+    const current = state.serveOrder.join(",");
+    const opt = Array.from($("#serveOrder").options).find(o=>o.value===current);
+    if (opt) $("#serveOrder").value = current;
   }
 
   function updateUI(){
-    // nombres
+    // nombres equipos
     $("#nameTeamA").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
     $("#nameTeamB").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
 
-    // sets/juegos/puntos
+    // marcador
     $("#setsA").textContent = state.score.setsA;
     $("#setsB").textContent = state.score.setsB;
     $("#gamesA").textContent = state.score.gamesA;
@@ -271,167 +271,144 @@
 
     $("#tennisScore").textContent = tennisStr(state.score.ptsA, state.score.ptsB);
     $("#serverNow").textContent = serverName();
-    $("#stateNow").textContent = state.meta.finished ? "Partido finalizado" : (state.meta.started ? "Juego en curso" : "Listo para iniciar");
+    $("#stateNow").textContent = state.meta.finished ? "Partido finalizado" : (state.meta.started ? "Juego en curso" : "Listo");
 
     // log
     const tbody = $("#tblLog tbody");
     tbody.innerHTML = "";
-    state.log.forEach(row=>{
+    state.log.forEach(r=>{
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${row.n}</td><td>${row.winnerPlayer}</td><td>${row.type}</td><td>${row.winnerTeam}</td><td>${row.gameStr}</td><td>${row.server}</td>`;
+      tr.innerHTML = `<td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td>`;
       tbody.appendChild(tr);
     });
 
-    // stats por jugadora
+    // stats
     const s = state.stats;
     $("#statsPlayers").innerHTML = `
       <div class="grid cols-2">
         ${["A1","A2","B1","B2"].map(id=>{
           const nm = state.players[id].name;
-          const t = teamOf(id)==="A"?"A":"B";
-          return `<div class="box">
+          const t = teamOf(id);
+          const r = s[id];
+          return `<div class="kpi"><div class="box">
             <div class="tiny">${nm} (${t})</div>
-            <div class="help">GG ${s[id].GG} · SG ${s[id].SG} · ENF ${s[id].ENF} · FE ${s[id].FE}</div>
-          </div>`;
+            <div class="help">GG ${r.GG} · SG ${r.SG} · ENF ${r.ENF} · FE ${r.FE}</div>
+          </div></div>`;
         }).join("")}
       </div>
     `;
+
     renderSaved();
-    persistAutosave();
+    autosave();
   }
 
-  // --------- Reglas de juego ----------
- function pointForTeam(team){
-  if (team === "A") state.score.ptsA++; else state.score.ptsB++;
-  const a = state.score.ptsA, b = state.score.ptsB;
+  // ---------- Lógica de juego (robusta, sin “pegado”) ----------
+  function closeGameIfNeeded(){
+    const a = state.score.ptsA, b = state.score.ptsB;
+    // GP si a==b>=3: no cierra aún
+    if (a >= 3 && b >= 3 && a === b) return false;
 
-  // ¿Llegamos a GP (40–40)? No cerramos aún, solo mostramos GP.
-  if (a >= 3 && b >= 3 && a === b){
-    return; // siguiente punto definirá el juego
-  }
+    // Condiciones de cierre SIN ventaja:
+    // 1) Alguien llegó a >=4 (por encima de 40)
+    // 2) Ambos >=3 y NO iguales (punto posterior a GP)
+    let winner = null;
+    if (a >= 4 || b >= 4) winner = (a > b) ? "A" : "B";
+    else if (a >= 3 && b >= 3 && a !== b) winner = (a > b) ? "A" : "B";
 
-  // ¿Cierra juego?
-  // Regla robusta sin ventaja:
-  // - Si alguien tiene >=4, cierra.
-  // - Si ambos tienen >=3 y NO están iguales, el que quedó arriba cierra.
-  let closeGame = false, winner = null;
-  if (a >= 4 || b >= 4) {
-    closeGame = true;
-    winner = (a > b) ? "A" : "B";
-  } else if (a >= 3 && b >= 3 && a !== b) {
-    closeGame = true;
-    winner = (a > b) ? "A" : "B";
+    if (winner){
+      if (winner === "A") state.score.gamesA++; else state.score.gamesB++;
+      resetGamePoints();
+      nextServer();
+      return true;
+    }
+    return false;
   }
-
-  if (closeGame){
-    if (winner === "A") state.score.gamesA++; else state.score.gamesB++;
-    resetGamePoints();
-    nextServer();
-    checkSetEnd();
-  }
-}
 
   function checkSetEnd(){
-  const gA = state.score.gamesA, gB = state.score.gamesB;
-  const need = 6; // juegos para set
-  // Sin tiebreak: diferencia de 2
-  if ((gA >= need || gB >= need) && Math.abs(gA - gB) >= 2){
-    if (gA > gB) state.score.setsA++; else state.score.setsB++;
-    state.score.gamesA = 0; state.score.gamesB = 0;
-    resetGamePoints();
+    const gA = state.score.gamesA, gB = state.score.gamesB;
+    const need = 6; // juegos para set
+    // Sin tiebreak: diferencia de 2
+    if ((gA >= need || gB >= need) && Math.abs(gA - gB) >= 2){
+      if (gA > gB) state.score.setsA++; else state.score.setsB++;
+      state.score.gamesA = 0; state.score.gamesB = 0;
+      resetGamePoints();
 
-    const targetSets = Math.ceil(state.meta.setFormat / 2);
-    if (state.score.setsA === targetSets || state.score.setsB === targetSets){
-      state.meta.finished = true;
+      const targetSets = Math.ceil(state.meta.setFormat / 2);
+      if (state.score.setsA === targetSets || state.score.setsB === targetSets){
+        state.meta.finished = true;
+      }
     }
   }
-}
-  // --------- Registro de un punto (botones) ---------
+
   function recordPoint(playerId, type){
     if (!state.meta.started || state.meta.finished) return;
-
-    pushUndo(); // snapshot para deshacer
-
-    // Determinar equipo ganador
+    pushUndo();
+    // ganador del punto según tipo
     let winnerTeam;
     if (type==="GG" || type==="SG"){
       winnerTeam = teamOf(playerId);
       state.stats[playerId][type] += 1;
-    } else if (type==="ENF" || type==="FE"){
-      // Error cometido por "playerId": punto para el otro equipo
+    } else { // ENF / FE
       state.stats[playerId][type] += 1;
-      winnerTeam = (teamOf(playerId)==="A") ? "B" : "A";
+      winnerTeam = teamOf(playerId) === "A" ? "B" : "A";
     }
 
-    // Avanza el marcador de puntos del juego
-    pointForTeam(winnerTeam);
+    // sumar punto al equipo ganador (del juego)
+    if (winnerTeam === "A") state.score.ptsA++; else state.score.ptsB++;
 
-    // Log
-    const row = {
+    // preparar log antes de posibles resets, mostrando el marcador actual
+    const preGameStr = `${tennisStr(state.score.ptsA, state.score.ptsB)} | Juegos ${state.score.gamesA}-${state.score.gamesB}`;
+
+    // ¿cierra juego?
+    const closed = closeGameIfNeeded();
+    if (closed) checkSetEnd();
+
+    // loguear
+    const eventoNombre = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
+    state.log.push({
       n: state.log.length+1,
-      winnerPlayer: (type==="ENF"||type==="FE") ? `Error ${playerName(playerId)}` : playerName(playerId),
+      evento: eventoNombre,
       type,
       winnerTeam,
-      gameStr: `${tennisStr(state.score.ptsA, state.score.ptsB)} | Juegos ${state.score.gamesA}-${state.score.gamesB}`,
+      gameStr: preGameStr,
       server: serverName()
-    };
-    state.log.push(row);
+    });
+
     updateUI();
   }
 
-  function playerName(id){ return state.players[id]?.name || id; }
-
-  // --------- Undo ---------
+  // ---------- Undo ----------
   function pushUndo(){ state.undoStack.push(deepClone(state)); if (state.undoStack.length>200) state.undoStack.shift(); }
   function undo(){
-    if (state.undoStack.length===0) return;
+    if (!state.undoStack.length) return;
     const prev = state.undoStack.pop();
-    // restaurar shallow (objetos anidados incluidos)
     Object.keys(state).forEach(k=> delete state[k]);
     Object.assign(state, prev);
     updateUI();
   }
 
-  // --------- Persistencia (autosave de partido en curso) ---------
-  const KEY_AUTOSAVE = "DJR_autosave_v1";
-  const KEY_SAVED = "DJR_saved_v1"; // últimos 4
+  // ---------- Historial / Persistencia ----------
+  const KEY_AUTOSAVE = "DJR_autosave_v2";
+  const KEY_SAVED    = "DJR_saved_v2"; // últimos 4
 
-  function persistAutosave(){
-    try{
-      localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(state));
-    }catch(e){}
+  function autosave(){
+    try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(state)); }catch(e){}
   }
   function loadAutosave(){
     try{
       const raw = localStorage.getItem(KEY_AUTOSAVE);
-      if (raw){
-        const st = JSON.parse(raw);
-        Object.keys(state).forEach(k=> delete state[k]);
-        Object.assign(state, st);
-      }
+      if (!raw) return;
+      const st = JSON.parse(raw);
+      Object.keys(state).forEach(k=> delete state[k]);
+      Object.assign(state, st);
     }catch(e){}
-  }
-
-  function saveToHistory(){
-    try{
-      const raw = localStorage.getItem(KEY_SAVED);
-      const arr = raw? JSON.parse(raw): [];
-      const snap = deepClone(state);
-      snap.savedAt = new Date().toISOString();
-      arr.unshift(snap);
-      while(arr.length>4) arr.pop();
-      localStorage.setItem(KEY_SAVED, JSON.stringify(arr));
-      renderSaved();
-      alert("Partido guardado en historial (máx. 4).");
-    }catch(e){ alert("No se pudo guardar."); }
   }
 
   function renderSaved(){
     const box = $("#savedList");
     const raw = localStorage.getItem(KEY_SAVED);
-    if (!raw){ box.innerHTML="No hay partidos guardados todavía."; return; }
-    const arr = JSON.parse(raw);
-    if (arr.length===0){ box.innerHTML="No hay partidos guardados todavía."; return; }
+    const arr = raw ? JSON.parse(raw) : [];
+    if (!arr.length){ box.innerHTML = "No hay partidos guardados todavía."; return; }
     box.innerHTML = arr.map((m,i)=>{
       const t = new Date(m.savedAt||m.meta?.createdAt||Date.now()).toLocaleString();
       const A = `${m.players.A1.name} & ${m.players.A2.name}`;
@@ -440,7 +417,7 @@
       return `<div class="score" style="margin-bottom:6px">
         <div>
           <div class="tiny">#${i+1} · ${t}</div>
-          <div>${A} <span class="muted">vs</span> ${B}</div>
+          <div>${A} <span class="tiny">vs</span> ${B}</div>
           <div class="tiny">Resultado: ${res}</div>
         </div>
         <div class="tabbar">
@@ -451,15 +428,12 @@
       </div>`;
     }).join("");
 
-    // Wire botones de cada tarjeta
     box.querySelectorAll("[data-load]").forEach(b=> b.onclick = ()=>{
       const idx = +b.getAttribute("data-load");
       const arr2 = JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
-      const pick = arr2[idx];
-      if (!pick) return;
+      const pick = arr2[idx]; if (!pick) return;
       Object.keys(state).forEach(k=> delete state[k]);
       Object.assign(state, pick);
-      state.meta.finished = !!pick.meta?.finished; // mantener estado
       updateUI();
       window.scrollTo({top:0,behavior:"smooth"});
     });
@@ -477,19 +451,27 @@
     });
   }
 
-  // --------- CSV ---------
+  function saveToHistory(){
+    try{
+      const raw = localStorage.getItem(KEY_SAVED);
+      const arr = raw? JSON.parse(raw): [];
+      const snap = deepClone(state);
+      snap.savedAt = new Date().toISOString();
+      arr.unshift(snap);
+      while(arr.length>4) arr.pop();
+      localStorage.setItem(KEY_SAVED, JSON.stringify(arr));
+      renderSaved();
+      alert("Partido guardado en historial (máx. 4).");
+    }catch(e){ alert("No se pudo guardar."); }
+  }
+
+  // ---------- CSV ----------
   function buildCSV(snap){
     const s = snap || state;
-    let lines = [];
-    const metaLine = [
-      "doblejotaenlared",
-      new Date(s.meta.createdAt||Date.now()).toISOString(),
-      `${s.players.A1.name} & ${s.players.A2.name}`,
-      `${s.players.B1.name} & ${s.players.B2.name}`,
-      `Sets ${s.score.setsA}-${s.score.setsB}`
-    ];
-    lines.push(metaLine.join(","));
-
+    const lines = [];
+    lines.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
+      `${s.players.A1.name} & ${s.players.A2.name}`, `${s.players.B1.name} & ${s.players.B2.name}`,
+      `Sets ${s.score.setsA}-${s.score.setsB}`].join(","));
     lines.push("");
     lines.push("Estadísticas por jugadora");
     lines.push("Jugadora,Equipo,GG,SG,ENF,FE");
@@ -498,22 +480,19 @@
       const r = s.stats[id]||{GG:0,SG:0,ENF:0,FE:0};
       lines.push([s.players[id].name,t,r.GG,r.SG,r.ENF,r.FE].join(","));
     });
-
     lines.push("");
     lines.push("Historial de puntos");
     lines.push("N,Evento,Tipo,Equipo Ganador,Marcador,Servidor");
     (s.log||[]).forEach(r=>{
-      lines.push([r.n, `"${r.winnerPlayer}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(","));
+      lines.push([r.n, `"${r.evento}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(","));
     });
-
     lines.push("");
     lines.push("Resumen final");
     lines.push(`Sets A,${s.score.setsA},Sets B,${s.score.setsB}`);
     return lines.join("\r\n");
   }
-
   function downloadCSV(content, filename){
-    const blob = new Blob([content], {type:"text/csv;charset=utf-8;"});
+    const blob = new Blob([content],{type:"text/csv;charset=utf-8;"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = filename || "doblejotaenlared.csv";
@@ -522,44 +501,16 @@
     URL.revokeObjectURL(url);
   }
 
-  // --------- Inicialización / eventos ---------
-  function refreshServeOrderOptions(){
-    const names = {
-      A1: $("#pA1").value || "A1",
-      A2: $("#pA2").value || "A2",
-      B1: $("#pB1").value || "B1",
-      B2: $("#pB2").value || "B2",
-    };
-    const options = [
-      ["A1,B1,A2,B2", `A1 (${names.A1}) → B1 (${names.B1}) → A2 (${names.A2}) → B2 (${names.B2})`],
-      ["A1,B2,A2,B1", `A1 (${names.A1}) → B2 (${names.B2}) → A2 (${names.A2}) → B1 (${names.B1})`],
-      ["B1,A1,B2,A2", `B1 (${names.B1}) → A1 (${names.A1}) → B2 (${names.B2}) → A2 (${names.A2})`],
-      ["B2,A1,B1,A2", `B2 (${names.B2}) → A1 (${names.A1}) → B1 (${names.B1}) → A2 (${names.A2})`],
-    ];
-    const sel = $("#serveOrder");
-    sel.innerHTML = options.map(([v,txt])=> `<option value="${v}">${txt}</option>`).join("");
-  }
-
+  // ---------- Inicio / Eventos ----------
   function startReset(){
-    // Nombres
-    state.players.A1.name = $("#pA1").value || "A1";
-    state.players.A2.name = $("#pA2").value || "A2";
-    state.players.B1.name = $("#pB1").value || "B1";
-    state.players.B2.name = $("#pB2").value || "B2";
-
-    // Orden de saque
-    const seq = $("#serveOrder").value || "A1,B1,A2,B2";
-    state.serveOrder = seq.split(",");
-
-    // Set format
+    syncNamesFromInputs();
     state.meta.setFormat = parseInt($("#setFormat").value,10);
+    const seq = ($("#serveOrder").value || "A1,B1,A2,B2").split(",");
+    state.serveOrder = seq.filter(x=>["A1","A2","B1","B2"].includes(x));
+    if (!state.serveOrder.length) state.serveOrder = ["A1","B1","A2","B2"];
+    state.serveIndex = 0;
 
-    // Reset scores
-    state.score.setsA = 0; state.score.setsB = 0;
-    state.score.gamesA = 0; state.score.gamesB = 0;
-    resetGamePoints();
-
-    // Stats y log
+    state.score = { setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 };
     ["A1","A2","B1","B2"].forEach(id=> state.stats[id]={GG:0,SG:0,ENF:0,FE:0});
     state.log = [];
     state.undoStack = [];
@@ -567,54 +518,52 @@
     state.meta.finished = false;
     state.meta.createdAt = new Date().toISOString();
     state.meta.id = "match_"+Date.now();
-    state.serveIndex = 0;
 
+    updateServeOrderOptions();
     updateUI();
   }
 
-  // Botones acción de puntos
+  // Inputs: mantener nombres en tiempo real en estadísticas
+  ["#pA1","#pA2","#pB1","#pB2"].forEach(sel=>{
+    $(sel).addEventListener("input", ()=>{
+      syncNamesFromInputs();
+      updateServeOrderOptions();
+      updateUI();
+    });
+  });
+
+  // Botones de puntos
   $$(".grid .btn").forEach(btn=>{
     const action = btn.getAttribute("data-action");
     const player = btn.getAttribute("data-player");
-    if (action && player){
-      btn.addEventListener("click", ()=> recordPoint(player, action));
-    }
+    if (action && player){ btn.addEventListener("click", ()=> recordPoint(player, action)); }
   });
 
   $("#btnStart").onclick = startReset;
   $("#btnUndo").onclick = undo;
   $("#btnEndSet").onclick = ()=>{
     if (!state.meta.started || state.meta.finished) return;
-    // Cierra set a favor del equipo con más juegos (si igualdad, no hace nada)
     if (state.score.gamesA===state.score.gamesB){ alert("Empate de juegos: no se puede cerrar el set manualmente."); return; }
     pushUndo();
     if (state.score.gamesA>state.score.gamesB) state.score.setsA++; else state.score.setsB++;
-    state.score.gamesA=0; state.score.gamesB=0;
-    resetGamePoints();
+    state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
     const targetSets = Math.ceil(state.meta.setFormat/2);
     if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
     updateUI();
   };
-
-  $("#btnEndMatch").onclick = ()=>{
-    if (!state.meta.started) return;
-    pushUndo();
-    state.meta.finished = true;
-    updateUI();
-  };
+  $("#btnEndMatch").onclick = ()=>{ if (!state.meta.started) return; pushUndo(); state.meta.finished = true; updateUI(); };
 
   $("#btnExport").onclick = ()=> downloadCSV(buildCSV(), "doblejotaenlared.csv");
   $("#btnSave").onclick = saveToHistory;
 
-  // reagregar opciones de orden cuando cambien nombres
-  ["#pA1","#pA2","#pB1","#pB2"].forEach(sel=>{
-    $(sel).addEventListener("input", refreshServeOrderOptions);
-  });
-
-  // Inicial
-  refreshServeOrderOptions();
+  // Carga autosave y primer render
   loadAutosave();
+  // Asegura que los inputs reflejen nombres del autosave al recargar
+  $("#pA1").value = state.players.A1.name; $("#pA2").value = state.players.A2.name;
+  $("#pB1").value = state.players.B1.name; $("#pB2").value = state.players.B2.name;
+  updateServeOrderOptions();
   updateUI();
+
 })();
 </script>
 </body>
