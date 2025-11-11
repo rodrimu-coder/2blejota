@@ -9,16 +9,25 @@
     --bg:#0b0f19; --panel:#101623; --line:#1e293b; --txt:#e5e7eb; --muted:#94a3b8;
     --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --btn:#1f2937; --ring:#22d3ee;
   }
+  /* Estilos mínimos para asegurar que no se vea "fea" */
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
   .wrap{max-width:980px;margin:auto;padding:12px}
+  h1, h2, .help, .card, input, select, .btn, .kpi .box, .score, .log, table{
+    /* Asegurar que los componentes principales usen los colores */
+    background: var(--panel); 
+    color: var(--txt);
+    border-color: var(--line);
+  }
+  
+  /* El resto de tus estilos originales... */
   h1{margin:4px 0 10px;font-size:18px}
   h2{margin:8px 0;font-size:15px;color:#cbd5e1}
-  .help{font-size:12px;color:var(--muted)}
+  .help{font-size:12px;color:var(--muted); background:transparent}
   .row{display:grid;gap:10px}
   @media(min-width:860px){.row.cols-2{grid-template-columns:1fr 1fr}}
   @media(min-width:980px){.row.cols-3{grid-template-columns:1fr .9fr 1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .card{border:1px solid var(--line);border-radius:10px;padding:10px}
   input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--txt);outline:none}
   input:focus,select:focus{border-color:var(--ring)}
   .btn{cursor:pointer;border:1px solid var(--line);background:#0f172a;color:var(--txt);padding:10px;border-radius:10px;font-weight:600}
@@ -28,14 +37,14 @@
   .btn.ghost{background:transparent}
   .grid{display:grid;gap:8px}
   .grid.cols-2{grid-template-columns:1fr 1fr}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#cbd5e1}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#cbd5e1; background:var(--panel)}
   .score{display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px dashed var(--line);padding:8px;border-radius:10px}
   .big{font-size:24px;font-weight:800}
   .kpi{display:flex;gap:8px;flex-wrap:wrap}
   .kpi .box{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
   .kpi .n{font-size:18px;font-weight:800}
-  .log{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px}
-  table{width:100%;border-collapse:collapse;font-size:12px}
+  .log{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px; background:var(--panel)}
+  table{width:100%;border-collapse:collapse;font-size:12px; background:var(--panel)}
   th,td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
   .gp{border:2px solid var(--warn)}
   .pill-warn{background:#2a1f0e;border:1px solid #8a6a0a;color:#f8d36c}
@@ -260,8 +269,7 @@ function closeGameIfNeeded(){
   if (a>=3 && b>=3 && a===b) return false; 
   
   let winner=null;
-  // El juego se cierra si un equipo tiene 4 o más puntos Y tiene la ventaja de al menos 1 (en GP) 
-  // o 2 (en juego normal antes de 40-40). La condición a>=4 o b>=4 ya engloba todos los casos de juego ganado.
+  // El juego se cierra si un equipo tiene 4 o más puntos.
   if (a>=4 || b>=4) winner = (a>b)?"A":"B";
   
   if (winner){
@@ -276,15 +284,12 @@ function checkSetEnd(){
   const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
   
   // La condición de cierre de set es: >=6 juegos Y una diferencia >= 2.
-  // Si estamos en 6-5, el juego debe continuar al 7-5. Si el set es a 6, se puede seguir anotando.
   if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
     if (gA>gB) state.score.setsA++; else state.score.setsB++;
     state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
     const targetSets = Math.ceil(state.meta.setFormat/2);
     if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
   }
-  // Nota: El problema anterior de "pegado" al llegar a 4 juegos era probablemente 
-  // porque closeGameIfNeeded() no estaba funcionando correctamente en la versión anterior.
 }
 
 function recordPoint(playerId, type){
@@ -456,7 +461,6 @@ $("#btnStart").onclick=startReset;
 $("#btnUndo").onclick=undo;
 $("#btnEndSet").onclick=()=>{
   if(!state.meta.started || state.meta.finished) return;
-  // Permite cerrar set si hay diferencia, incluso si no es >=2, por si se jugó un set corto.
   if(state.score.gamesA===state.score.gamesB){ alert("Empate de juegos: no se puede cerrar el set."); return; }
   pushUndo(); if(state.score.gamesA>state.score.gamesB) state.score.setsA++; else state.score.setsB++;
   state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
