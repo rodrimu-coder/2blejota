@@ -3,206 +3,199 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>doblejotaenlared Score (Vrodimu10)</title>
+<title>doblejotaenlared · Score (Vrodimu10 · fix undo)</title>
 <style>
-  :root{
-    --bg:#0b0f19; --panel:#101623; --line:#1e293b; --txt:#e5e7eb; --muted:#94a3b8;
-    --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --btn:#1f2937; --ring:#22d3ee;
-  }
-  /* Estilos mínimos para asegurar que no se vea "fea" */
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
-  .wrap{max-width:980px;margin:auto;padding:12px}
-  h1, h2, .help, .card, input, select, .btn, .kpi .box, .score, .log, table{
-    /* Asegurar que los componentes principales usen los colores */
-    background: var(--panel); 
-    color: var(--txt);
-    border-color: var(--line);
-  }
-  
-  /* El resto de tus estilos originales... */
-  h1{margin:4px 0 10px;font-size:18px}
-  h2{margin:8px 0;font-size:15px;color:#cbd5e1}
-  .help{font-size:12px;color:var(--muted); background:transparent}
-  .row{display:grid;gap:10px}
-  @media(min-width:860px){.row.cols-2{grid-template-columns:1fr 1fr}}
-  @media(min-width:980px){.row.cols-3{grid-template-columns:1fr .9fr 1fr}}
-  .card{border:1px solid var(--line);border-radius:10px;padding:10px}
-  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--txt);outline:none}
-  input:focus,select:focus{border-color:var(--ring)}
-  .btn{cursor:pointer;border:1px solid var(--line);background:#0f172a;color:var(--txt);padding:10px;border-radius:10px;font-weight:600}
-  .btn:active{transform:translateY(1px)}
-  .btn.ok{background:#0e2a19;border-color:#14532d}
-  .btn.bad{background:#2a1111;border-color:#7f1d1d}
-  .btn.ghost{background:transparent}
-  .grid{display:grid;gap:8px}
-  .grid.cols-2{grid-template-columns:1fr 1fr}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#cbd5e1; background:var(--panel)}
-  .score{display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px dashed var(--line);padding:8px;border-radius:10px}
-  .big{font-size:24px;font-weight:800}
-  .kpi{display:flex;gap:8px;flex-wrap:wrap}
-  .kpi .box{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-  .kpi .n{font-size:18px;font-weight:800}
-  .log{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px; background:var(--panel)}
-  table{width:100%;border-collapse:collapse;font-size:12px; background:var(--panel)}
-  th,td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-  .gp{border:2px solid var(--warn)}
-  .pill-warn{background:#2a1f0e;border:1px solid #8a6a0a;color:#f8d36c}
-  .sep{height:1px;background:var(--line);margin:8px 0}
+  :root{
+    --bg:#0b0f19; --panel:#101623; --line:#1e293b; --txt:#e5e7eb; --muted:#94a3b8;
+    --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --ring:#22d3ee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+  .wrap{max-width:980px;margin:auto;padding:12px}
+  h1{margin:4px 0 10px;font-size:18px}
+  h2{margin:8px 0;font-size:15px;color:#cbd5e1}
+  .help{font-size:12px;color:var(--muted)}
+  .row{display:grid;gap:10px}
+  @media(min-width:860px){.row.cols-2{grid-template-columns:1fr 1fr}}
+  @media(min-width:980px){.row.cols-3{grid-template-columns:1fr .9fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--txt);outline:none}
+  input:focus,select:focus{border-color:var(--ring)}
+  .btn{cursor:pointer;border:1px solid var(--line);background:#0f172a;color:var(--txt);padding:10px;border-radius:10px;font-weight:600}
+  .btn:active{transform:translateY(1px)}
+  .btn.ok{background:#0e2a19;border-color:#14532d}
+  .btn.bad{background:#2a1111;border-color:#7f1d1d}
+  .btn.ghost{background:transparent}
+  .grid{display:grid;gap:8px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#cbd5e1;background:transparent}
+  .score{display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px dashed var(--line);padding:8px;border-radius:10px}
+  .big{font-size:24px;font-weight:800}
+  .kpi{display:flex;gap:8px;flex-wrap:wrap}
+  .kpi .box{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .kpi .n{font-size:18px;font-weight:800}
+  .log{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .gp{border:2px solid var(--warn)}
+  .pill-warn{background:#2a1f0e;border:1px solid #8a6a0a;color:#f8d36c;padding:2px 6px;border-radius:999px}
+  .sep{height:1px;background:var(--line);margin:8px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🎾 doblejotaenlared — Marcador  (Vrodrimu)</h1>
+  <h1>🎾 doblejotaenlared — Marcador de Pádel (Vrodrimu)</h1>
 
-  <div class="card">
-    <h2>1) Configuración</h2>
-    <div class="row cols-2">
-      <div class="card">
-        <div class="grid">
-          <div class="grid cols-2">
-            <div><div class="help">A1</div><input id="pA1" value="A1" /></div>
-            <div><div class="help">A2</div><input id="pA2" value="A2" /></div>
-          </div>
-          <div class="grid cols-2">
-            <div><div class="help">B1</div><input id="pB1" value="B1" /></div>
-            <div><div class="help">B2</div><input id="pB2" value="B2" /></div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="grid">
-          <div>
-            <div class="help">Orden de servicio (quién saca primero y rotación)</div>
-            <select id="serveOrder"></select>
-            <div class="help">Rotación: Servidor → siguiente de la lista.</div>
-          </div>
-          <div>
-            <div class="help">Formato de sets</div>
-            <select id="setFormat">
-              <option value="1">1 set (6 juegos, +2, sin tiebreak)</option>
-              <option value="3" selected>Mejor de 3</option>
-              <option value="5">Mejor de 5</option>
-            </select>
-          </div>
-          <div class="grid cols-2">
-            <button id="btnStart" class="btn ok">Iniciar/Resetear</button>
-            <button id="btnUndo" class="btn">Deshacer punto</button>
-          </div>
-          <div class="grid cols-2">
-            <button id="btnEndSet" class="btn">Cerrar set</button>
-            <button id="btnEndMatch" class="btn bad">Terminar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="card">
+    <h2>1) Configuración</h2>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="grid">
+          <div class="grid cols-2">
+            <div><div class="help">A1</div><input id="pA1" value="A1" /></div>
+            <div><div class="help">A2</div><input id="pA2" value="A2" /></div>
+          </div>
+          <div class="grid cols-2">
+            <div><div class="help">B1</div><input id="pB1" value="B1" /></div>
+            <div><div class="help">B2</div><input id="pB2" value="B2" /></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid">
+          <div>
+            <div class="help">Orden de servicio (quién saca primero y rotación)</div>
+            <select id="serveOrder"></select>
+            <div class="help">Rotación: Servidor → siguiente de la lista.</div>
+          </div>
+          <div>
+            <div class="help">Formato de sets</div>
+            <select id="setFormat">
+              <option value="1">1 set (6 juegos, +2, sin tiebreak)</option>
+              <option value="3" selected>Mejor de 3</option>
+              <option value="5">Mejor de 5</option>
+            </select>
+          </div>
+          <div class="grid cols-2">
+            <button id="btnStart" class="btn ok">Iniciar/Resetear</button>
+            <button id="btnUndo" class="btn">Deshacer punto</button>
+          </div>
+          <div class="grid cols-2">
+            <button id="btnEndSet" class="btn">Cerrar set</button>
+            <button id="btnEndMatch" class="btn bad">Terminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <div class="sep"></div>
+    <div class="sep"></div>
 
-    <h2>2) Tablero</h2>
-    <div class="row cols-3">
-      <div class="card">
-        <div id="teamATitle" class="help">Equipo A</div>
-        <div class="kpi">
-          <div class="box"><div class="help">Sets</div><div id="setsA" class="n">0</div></div>
-          <div class="box"><div class="help">Juegos (set)</div><div id="gamesA" class="n">0</div></div>
-          <div class="box"><div class="help">Puntos (juego)</div><div id="pointsA" class="n">0</div></div>
-        </div>
-      </div>
-      <div id="scoreBox" class="card">
-        <div class="score">
-          <div><div class="help">Servidor</div><div class="badge" id="serverNow">-</div></div>
-          <div class="big" id="tennisScore">0 — 0</div>
-          <div><div class="help">Estado</div><div class="badge" id="stateNow">Listo</div></div>
-        </div>
-        <div id="gpNote" class="help" style="margin-top:6px">A 40–40 hay <b>Punto de Oro</b>.</div>
-      </div>
-      <div class="card">
-        <div id="teamBTitle" class="help">Equipo B</div>
-        <div class="kpi">
-          <div class="box"><div class="help">Sets</div><div id="setsB" class="n">0</div></div>
-          <div class="box"><div class="help">Juegos (set)</div><div id="gamesB" class="n">0</div></div>
-          <div class="box"><div class="help">Puntos (juego)</div><div id="pointsB" class="n">0</div></div>
-        </div>
-      </div>
-    </div>
+    <h2>2) Tablero</h2>
+    <div class="row cols-3">
+      <div class="card">
+        <div id="teamATitle" class="help">Equipo A</div>
+        <div class="kpi">
+          <div class="box"><div class="help">Sets</div><div id="setsA" class="n">0</div></div>
+          <div class="box"><div class="help">Juegos (set)</div><div id="gamesA" class="n">0</div></div>
+          <div class="box"><div class="help">Puntos (juego)</div><div id="pointsA" class="n">0</div></div>
+        </div>
+      </div>
+      <div id="scoreBox" class="card">
+        <div class="score">
+          <div><div class="help">Servidor</div><div class="badge" id="serverNow">-</div></div>
+          <div class="big" id="tennisScore">0 — 0</div>
+          <div><div class="help">Estado</div><div class="badge" id="stateNow">Listo</div></div>
+        </div>
+        <div id="gpNote" class="help" style="margin-top:6px">A 40–40 hay <b>Punto de Oro</b>.</div>
+      </div>
+      <div class="card">
+        <div id="teamBTitle" class="help">Equipo B</div>
+        <div class="kpi">
+          <div class="box"><div class="help">Sets</div><div id="setsB" class="n">0</div></div>
+          <div class="box"><div class="help">Juegos (set)</div><div id="gamesB" class="n">0</div></div>
+          <div class="box"><div class="help">Puntos (juego)</div><div id="pointsB" class="n">0</div></div>
+        </div>
+      </div>
+    </div>
 
-    <h2 style="margin-top:8px">3) Registrar punto</h2>
-    <div class="row cols-2" id="actionsGrid">
-      <div class="card">
-        <div class="help">Equipo A — Acciones</div>
-        <div class="grid cols-2">
-          <button class="btn ok" data-player="A1" data-action="GG">A1 · GG</button>
-          <button class="btn ok" data-player="A1" data-action="SG">A1 · SG</button>
-          <button class="btn"    data-player="A1" data-action="ENF">A1 · ENF</button>
-          <button class="btn"    data-player="A1" data-action="FE">A1 · FE</button>
+    <h2 style="margin-top:8px">3) Registrar punto</h2>
+    <div class="row cols-2" id="actionsGrid">
+      <div class="card">
+        <div class="help">Equipo A — Acciones</div>
+        <div class="grid cols-2">
+          <button class="btn ok" data-player="A1" data-action="GG">A1 · GG</button>
+          <button class="btn ok" data-player="A1" data-action="SG">A1 · SG</button>
+          <button class="btn"    data-player="A1" data-action="ENF">A1 · ENF</button>
+          <button class="btn"    data-player="A1" data-action="FE">A1 · FE</button>
 
-          <button class="btn ok" data-player="A2" data-action="GG">A2 · GG</button>
-          <button class="btn ok" data-player="A2" data-action="SG">A2 · SG</button>
-          <button class="btn"    data-player="A2" data-action="ENF">A2 · ENF</button>
-          <button class="btn"    data-player="A2" data-action="FE">A2 · FE</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="help">Equipo B — Acciones</div>
-        <div class="grid cols-2">
-          <button class="btn ok" data-player="B1" data-action="GG">B1 · GG</button>
-          <button class="btn ok" data-player="B1" data-action="SG">B1 · SG</button>
-          <button class="btn"    data-player="B1" data-action="ENF">B1 · ENF</button>
-          <button class="btn"    data-player="B1" data-action="FE">B1 · FE</button>
+          <button class="btn ok" data-player="A2" data-action="GG">A2 · GG</button>
+          <button class="btn ok" data-player="A2" data-action="SG">A2 · SG</button>
+          <button class="btn"    data-player="A2" data-action="ENF">A2 · ENF</button>
+          <button class="btn"    data-player="A2" data-action="FE">A2 · FE</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="help">Equipo B — Acciones</div>
+        <div class="grid cols-2">
+          <button class="btn ok" data-player="B1" data-action="GG">B1 · GG</button>
+          <button class="btn ok" data-player="B1" data-action="SG">B1 · SG</button>
+          <button class="btn"    data-player="B1" data-action="ENF">B1 · ENF</button>
+          <button class="btn"    data-player="B1" data-action="FE">B1 · FE</button>
 
-          <button class="btn ok" data-player="B2" data-action="GG">B2 · GG</button>
-          <button class="btn ok" data-player="B2" data-action="SG">B2 · SG</button>
-          <button class="btn"    data-player="B2" data-action="ENF">B2 · ENF</button>
-          <button class="btn"    data-player="B2" data-action="FE">B2 · FE</button>
-        </div>
-      </div>
-    </div>
+          <button class="btn ok" data-player="B2" data-action="GG">B2 · GG</button>
+          <button class="btn ok" data-player="B2" data-action="SG">B2 · SG</button>
+          <button class="btn"    data-player="B2" data-action="ENF">B2 · ENF</button>
+          <button class="btn"    data-player="B2" data-action="FE">B2 · FE</button>
+        </div>
+      </div>
+    </div>
 
-    <div class="row cols-2" style="margin-top:8px">
-      <div class="card">
-        <div class="help">Estadísticas por jugadora</div>
-        <div id="statsPlayers" class="help">Sin datos.</div>
-      </div>
-      <div class="card">
-        <div class="help">Historial del partido</div>
-        <div class="log">
-          <table>
-            <thead><tr><th>#</th><th>Evento</th><th>Tipo</th><th>Equipo</th><th>Marcador</th><th>Servidor</th></tr></thead>
-            <tbody id="tblLog"></tbody>
-          </table>
-        </div>
-        <div class="grid cols-2" style="margin-top:8px">
-          <button id="btnExport" class="btn">Exportar CSV</button>
-          <button id="btnSave" class="btn">Guardar (máx. 4)</button>
-        </div>
-      </div>
-    </div>
+    <div class="row cols-2" style="margin-top:8px">
+      <div class="card">
+        <div class="help">Estadísticas por jugadora</div>
+        <div id="statsPlayers" class="help">Sin datos.</div>
+      </div>
+      <div class="card">
+        <div class="help">Historial del partido</div>
+        <div class="log">
+          <table>
+            <thead><tr><th>#</th><th>Evento</th><th>Tipo</th><th>Equipo</th><th>Marcador</th><th>Servidor</th></tr></thead>
+            <tbody id="tblLog"></tbody>
+          </table>
+        </div>
+        <div class="grid cols-2" style="margin-top:8px">
+          <button id="btnExport" class="btn">Exportar CSV</button>
+          <button id="btnSave" class="btn">Guardar (máx. 4)</button>
+        </div>
+      </div>
+    </div>
 
-    <h2 style="margin-top:8px">4) Últimos 4 partidos guardados</h2>
-    <div class="card"><div id="savedList" class="help">No hay partidos.</div></div>
-  </div>
+    <h2 style="margin-top:8px">4) Últimos 4 partidos guardados</h2>
+    <div class="card"><div id="savedList" class="help">No hay partidos.</div></div>
+  </div>
 </div>
 
 <script>
-/* ========= Estado y helpers ========= */
+/* ===== Helpers y estado ===== */
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 const state = {
-  meta:{ started:false, finished:false, setFormat:3, createdAt:null, id:null },
-  players:{ A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"} },
-  serveOrder:["A1","B1","A2","B2"],
-  serveIndex:0,
-  score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
-  stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
-  log:[],
-  undoStack:[],
-  eventsSinceSave:0
+  meta:{ started:false, finished:false, setFormat:3, createdAt:null, id:null },
+  players:{ A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"} },
+  serveOrder:["A1","B1","A2","B2"],
+  serveIndex:0,
+  score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
+  stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
+  log:[],
+  undoStack:[],
+  eventsSinceSave:0
 };
-const KEY_AUTOSAVE="DJR_autosave_fast_v1", KEY_SAVED="DJR_saved_fast_v1";
 
-const deepClone = o => JSON.parse(JSON.stringify(o));
+const KEY_AUTOSAVE="DJR_autosave_fast_v2";
+const KEY_SAVED  ="DJR_saved_fast_v2";
+
+/* ===== util ===== */
 const teamOf = id => id[0]==="A" ? "A" : "B";
 const serverId = () => state.serveOrder[state.serveIndex] || "A1";
 const serverName = () => state.players[serverId()]?.name || serverId();
@@ -210,262 +203,295 @@ const nextServer = () => state.serveIndex = (state.serveIndex + 1) % state.serve
 const resetGamePoints = () => { state.score.ptsA = 0; state.score.ptsB = 0; };
 
 function tennisStr(a,b){
-  const map = ["0","15","30","40"];
-  
-  // 1. CASOS DE JUEGO GANADO (se muestra justo antes del reset de puntos)
-  if ((a >= 4 || b >= 4) && Math.abs(a-b)>=1) { 
-    if (a > b) return "Gana A (Juego)";
-    if (b > a) return "Gana B (Juego)";
-  }
-  
-  // 2. CASO ESPECIAL: 40-40 (Punto de Oro)
-  if (a>=3 && b>=3 && a===b) return "GP"; 
-  
-  // 3. Marcadores normales
-  const sa = (a>=3)?"40":(map[a]||"40"), sb = (b>=3)?"40":(map[b]||"40");
-  return `${sa} — ${sb}`;
+  const map = ["0","15","30","40"];
+  if (a>=3 && b>=3 && a===b) return "GP"; // 40–40
+  const sa = (a>=3)?"40":(map[a]||"40");
+  const sb = (b>=3)?"40":(map[b]||"40");
+  return `${sa} — ${sb}`;
 }
-function isGoldenPoint(){ return state.score.ptsA>=3 && state.score.ptsB>=3 && state.score.ptsA===state.score.ptsB; }
+const isGoldenPoint = () => (state.score.ptsA>=3 && state.score.ptsB>=3 && state.score.ptsA===state.score.ptsB);
 
 function syncNames(){
-  state.players.A1.name = $("#pA1").value.trim() || "A1";
-  state.players.A2.name = $("#pA2").value.trim() || "A2";
-  state.players.B1.name = $("#pB1").value.trim() || "B1";
-  state.players.B2.name = $("#pB2").value.trim() || "B2";
+  state.players.A1.name = $("#pA1").value.trim() || "A1";
+  state.players.A2.name = $("#pA2").value.trim() || "A2";
+  state.players.B1.name = $("#pB1").value.trim() || "B1";
+  state.players.B2.name = $("#pB2").value.trim() || "B2";
 }
 
 function updateServeOrderOptions(){
-  const n = state.players;
-  const opts = [
-    ["A1,B1,A2,B2", `A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name}) → B2 (${n.B2.name})`],
-    ["A1,B2,A2,B1", `A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name}) → B1 (${n.B1.name})`],
-    ["B1,A1,B2,A2", `B1 (${n.B1.name}) → A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name})`],
-    ["B2,A1,B1,A2", `B2 (${n.B2.name}) → A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name})`],
-  ];
-  const sel = $("#serveOrder");
-  sel.innerHTML = opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
-  const current = state.serveOrder.join(",");
-  if ([...sel.options].some(o=>o.value===current)) sel.value = current;
+  const n = state.players;
+  const opts = [
+    ["A1,B1,A2,B2", `A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name}) → B2 (${n.B2.name})`],
+    ["A1,B2,A2,B1", `A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name}) → B1 (${n.B1.name})`],
+    ["B1,A1,B2,A2", `B1 (${n.B1.name}) → A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name})`],
+    ["B2,A1,B1,A2", `B2 (${n.B2.name}) → A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name})`],
+  ];
+  const sel = $("#serveOrder");
+  sel.innerHTML = opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  const current = state.serveOrder.join(",");
+  if ([...sel.options].some(o=>o.value===current)) sel.value = current;
 }
 
 function updateActionLabels(){
-  const nameOf = id => state.players[id]?.name || id;
-  ["A1","A2","B1","B2"].forEach(id=>{
-    ["GG","SG","ENF","FE"].forEach(act=>{
-      const btn = document.querySelector(`button[data-player="${id}"][data-action="${act}"]`);
-      if (btn) btn.textContent = `${nameOf(id)} · ${act}`;
-    });
-  });
+  const nameOf = id => state.players[id]?.name || id;
+  ["A1","A2","B1","B2"].forEach(id=>{
+    ["GG","SG","ENF","FE"].forEach(act=>{
+      const btn = document.querySelector(`button[data-player="${id}"][data-action="${act}"]`);
+      if (btn) btn.textContent = `${nameOf(id)} · ${act}`;
+    });
+  });
 }
 
-function pushUndo(){ state.undoStack.push(deepClone(state)); if (state.undoStack.length>100) state.undoStack.shift(); }
-function undo(){ if(!state.undoStack.length) return; const prev=state.undoStack.pop(); Object.keys(state).forEach(k=>delete state[k]); Object.assign(state,prev); render(); }
+/* ===== Snapshots ligeros (¡clave para evitar cuelgues!) ===== */
+function makeLightSnapshot(src=state){
+  // Excluye undoStack y cuenta de eventos; incluye lo necesario para reanudar.
+  return {
+    meta: {...src.meta},
+    players: JSON.parse(JSON.stringify(src.players)),
+    serveOrder: [...src.serveOrder],
+    serveIndex: src.serveIndex,
+    score: {...src.score},
+    stats: JSON.parse(JSON.stringify(src.stats)),
+    log: JSON.parse(JSON.stringify(src.log))
+  };
+}
+function pushUndo(){
+  const snap = makeLightSnapshot();
+  state.undoStack.push(snap);
+  if (state.undoStack.length>60) state.undoStack.shift();
+}
+function undo(){
+  if (!state.undoStack.length) return;
+  const prev = state.undoStack.pop();
+  // Restaurar SOLO desde snapshot ligero
+  state.meta = prev.meta;
+  state.players = prev.players;
+  state.serveOrder = prev.serveOrder;
+  state.serveIndex = prev.serveIndex;
+  state.score = prev.score;
+  state.stats = prev.stats;
+  state.log = prev.log;
+  // no restauramos undoStack previo para evitar cascadas
+  render();
+}
 
-/* ========= Lógica de juego ========= */
+/* ===== Juego ===== */
 function closeGameIfNeeded(){
-  const a = state.score.ptsA, b = state.score.ptsB;
-  
-  // Si estamos en 40-40 (3-3), NO cerramos el juego, el siguiente punto lo cerrará (GP)
-  if (a>=3 && b>=3 && a===b) return false; 
-  
-  let winner=null;
-  // El juego se cierra si un equipo tiene 4 o más puntos.
-  if (a>=4 || b>=4) winner = (a>b)?"A":"B";
-  
-  if (winner){
-    if (winner==="A") state.score.gamesA++; else state.score.gamesB++;
-    resetGamePoints(); nextServer();
-    return true;
-  }
-  return false;
+  const a = state.score.ptsA, b = state.score.ptsB;
+  if (a>=3 && b>=3 && a===b) return false; // GP no cierra
+
+  let winner=null;
+  if (a>=4 || b>=4) winner = (a>b) ? "A" : "B";
+  else if (a>=3 && b>=3 && a!==b) winner = (a>b) ? "A" : "B";
+
+  if (winner){
+    if (winner==="A") state.score.gamesA++; else state.score.gamesB++;
+    resetGamePoints(); nextServer();
+    return true;
+  }
+  return false;
 }
 
 function checkSetEnd(){
-  const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
-  
-  // La condición de cierre de set es: >=6 juegos Y una diferencia >= 2.
-  if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
-    if (gA>gB) state.score.setsA++; else state.score.setsB++;
-    state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
-    const targetSets = Math.ceil(state.meta.setFormat/2);
-    if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
-  }
+  const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
+  if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
+    if (gA>gB) state.score.setsA++; else state.score.setsB++;
+    state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
+    const targetSets = Math.ceil(state.meta.setFormat/2);
+    if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
+  }
 }
 
 function recordPoint(playerId, type){
-  if (!state.meta.started || state.meta.finished) return;
-  pushUndo();
+  if (!state.meta.started || state.meta.finished) return;
 
-  let winnerTeam;
-  // 1. Registrar el punto en el estado
-  if (type==="GG" || type==="SG"){
-    winnerTeam = teamOf(playerId);
-    state.stats[playerId][type] += 1;
-  } else {
-    state.stats[playerId][type] += 1;
-    winnerTeam = teamOf(playerId)==="A" ? "B" : "A";
-  }
-  if (winnerTeam==="A") state.score.ptsA++; else state.score.ptsB++;
+  pushUndo();
 
-  // Captura el marcador de puntos justo después de anotar (antes del reset).
-  const pointStr = tennisStr(state.score.ptsA, state.score.ptsB);
-  const eventGameStr = `${pointStr} | Juegos ${state.score.gamesA}-${state.score.gamesB}`;
+  let winnerTeam;
+  if (type==="GG" || type==="SG"){
+    winnerTeam = teamOf(playerId);
+    state.stats[playerId][type] += 1;
+  } else {
+    state.stats[playerId][type] += 1;
+    winnerTeam = teamOf(playerId)==="A" ? "B" : "A";
+  }
+  if (winnerTeam==="A") state.score.ptsA++; else state.score.ptsB++;
 
-  // 2. Cerrar juego y set (Esto incrementa gamesA/B y resetea ptsA/B si cerró)
-  const closed = closeGameIfNeeded();
-  if (closed) checkSetEnd();
+  const pointStr = tennisStr(state.score.ptsA, state.score.ptsB);
+  const eventGameStr = `${pointStr} | Juegos ${state.score.gamesA}-${state.score.gamesB}`;
 
-  // 3. Registrar el evento en el log (usa la cadena capturada antes del reset)
-  const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
-  state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr: eventGameStr, server: serverName() });
+  const closed = closeGameIfNeeded();
+  if (closed) checkSetEnd();
 
-  state.eventsSinceSave++;
-  render();
-  if (state.eventsSinceSave>=5) { autosave(); state.eventsSinceSave=0; }
+  const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
+  state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr: eventGameStr, server: serverName() });
+
+  state.eventsSinceSave++;
+  render();
+  if (state.eventsSinceSave>=5){ autosave(); state.eventsSinceSave=0; }
 }
 
-/* ========= Persistencia y Render (Sin Cambios Lógicos Mayores) ========= */
-function autosave(){ try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(state)); }catch(e){} }
+/* ===== Persistencia ===== */
+function autosave(){
+  try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot())); }catch(e){}
+}
 function loadAutosave(){
-  try{
-    const raw=localStorage.getItem(KEY_AUTOSAVE); if(!raw) return false;
-    const st=JSON.parse(raw); Object.keys(state).forEach(k=>delete state[k]); Object.assign(state,st); return true;
-  }catch(e){ return false; }
+  try{
+    const raw = localStorage.getItem(KEY_AUTOSAVE); if(!raw) return false;
+    const s = JSON.parse(raw);
+    // Reconstruir estado desde snapshot ligero
+    state.meta = s.meta;
+    state.players = s.players;
+    state.serveOrder = s.serveOrder;
+    state.serveIndex = s.serveIndex;
+    state.score = s.score;
+    state.stats = s.stats;
+    state.log = s.log;
+    state.undoStack = []; // empezamos limpio
+    state.eventsSinceSave = 0;
+    return true;
+  }catch(e){ return false; }
 }
 function saveToHistory(){
-  try{
-    const arr = JSON.parse(localStorage.getItem(KEY_SAVED) || "[]");
-    const snap = deepClone(state); snap.savedAt = new Date().toISOString();
-    arr.unshift(snap); while(arr.length>4) arr.pop();
-    localStorage.setItem(KEY_SAVED, JSON.stringify(arr));
-    renderSaved(); alert("Guardado en historial.");
-  }catch(e){ alert("No se pudo guardar."); }
+  try{
+    const arr = JSON.parse(localStorage.getItem(KEY_SAVED) || "[]");
+    const snap = makeLightSnapshot(); snap.savedAt = new Date().toISOString();
+    arr.unshift(snap); while(arr.length>4) arr.pop();
+    localStorage.setItem(KEY_SAVED, JSON.stringify(arr));
+    renderSaved(); alert("Guardado en historial.");
+  }catch(e){ alert("No se pudo guardar."); }
 }
 function renderSaved(){
-  const box=$("#savedList"); const arr=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
-  if(!arr.length){ box.textContent="No hay partidos."; return; }
-  box.innerHTML = arr.map((m,i)=>{
-    const t=new Date(m.savedAt||m.meta?.createdAt||Date.now()).toLocaleString();
-    const A=`${m.players.A1.name} & ${m.players.A2.name}`, B=`${m.players.B1.name} & ${m.players.B2.name}`;
-    const res=`${m.score.setsA}-${m.score.setsB} sets`;
-    return `<div class="score">
-      <div><div class="help">#${i+1} · ${t}</div><div>${A} <span class="help">vs</span> ${B}</div><div class="help">${res}</div></div>
-      <div class="grid" style="grid-template-columns:auto auto auto;gap:6px">
-        <button class="btn ghost" data-load="${i}">Cargar</button>
-        <button class="btn bad" data-del="${i}">Borrar</button>
-        <button class="btn" data-export="${i}">CSV</button>
-      </div>
-    </div>`;
-  }).join("");
-  box.querySelectorAll("[data-load]").forEach(b=> b.onclick=()=>{
-    const idx=+b.getAttribute("data-load"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
-    const pick=arr2[idx]; if(!pick)return; Object.keys(state).forEach(k=>delete state[k]); Object.assign(state,pick); render();
-    window.scrollTo({top:0,behavior:"smooth"});
-  });
-  box.querySelectorAll("[data-del]").forEach(b=> b.onclick=()=>{
-    const idx=+b.getAttribute("data-del"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
-    arr2.splice(idx,1); localStorage.setItem(KEY_SAVED, JSON.stringify(arr2)); renderSaved();
-  });
-  box.querySelectorAll("[data-export]").forEach(b=> b.onclick=()=>{
-    const idx=+b.getAttribute("data-export"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
-    if(arr2[idx]) downloadCSV(buildCSV(arr2[idx]), `doblejotaenlared_guardado_${idx+1}.csv`);
-  });
+  const box=$("#savedList"); const arr=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+  if(!arr.length){ box.textContent="No hay partidos."; return; }
+  box.innerHTML = arr.map((m,i)=>{
+    const t=new Date(m.savedAt||m.meta?.createdAt||Date.now()).toLocaleString();
+    const A=`${m.players.A1.name} & ${m.players.A2.name}`, B=`${m.players.B1.name} & ${m.players.B2.name}`;
+    const res=`${m.score.setsA}-${m.score.setsB} sets`;
+    return `<div class="score">
+      <div><div class="help">#${i+1} · ${t}</div><div>${A} <span class="help">vs</span> ${B}</div><div class="help">${res}</div></div>
+      <div class="grid" style="grid-template-columns:auto auto auto;gap:6px">
+        <button class="btn ghost" data-load="${i}">Cargar</button>
+        <button class="btn bad" data-del="${i}">Borrar</button>
+        <button class="btn" data-export="${i}">CSV</button>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-load]").forEach(b=> b.onclick=()=>{
+    const idx=+b.getAttribute("data-load"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+    const pick=arr2[idx]; if(!pick)return;
+    // Restaurar desde snapshot ligero
+    state.meta = pick.meta;
+    state.players = pick.players;
+    state.serveOrder = pick.serveOrder;
+    state.serveIndex = pick.serveIndex;
+    state.score = pick.score;
+    state.stats = pick.stats;
+    state.log = pick.log;
+    state.undoStack = [];
+    state.eventsSinceSave = 0;
+    render();
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+  box.querySelectorAll("[data-del]").forEach(b=> b.onclick=()=>{
+    const idx=+b.getAttribute("data-del"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+    arr2.splice(idx,1); localStorage.setItem(KEY_SAVED, JSON.stringify(arr2)); renderSaved();
+  });
+  box.querySelectorAll("[data-export]").forEach(b=> b.onclick=()=>{
+    const idx=+b.getAttribute("data-export"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+    if(arr2[idx]) downloadCSV(buildCSV(arr2[idx]), `doblejotaenlared_guardado_${idx+1}.csv`);
+  });
 }
 
-/* ========= CSV (Sin Cambios) ========= */
+/* ===== CSV ===== */
 function buildCSV(snap){
-  const s=snap||state; const L=[];
-  L.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
-          `${s.players.A1.name} & ${s.players.A2.name}`,
-          `${s.players.B1.name} & ${s.players.B2.name}`,
-          `Sets ${s.score.setsA}-${s.score.setsB}`].join(","));
-  L.push(""); L.push("Estadísticas por jugadora"); L.push("Jugadora,Equipo,GG,SG,ENF,FE");
-  ["A1","A2","B1","B2"].forEach(id=>{
-    const r=s.stats[id]||{GG:0,SG:0,ENF:0,FE:0}; L.push([s.players[id].name, teamOf(id), r.GG, r.SG, r.ENF, r.FE].join(","));
-  });
-  L.push(""); L.push("Historial de puntos"); L.push("N,Evento,Tipo,Equipo,Marcador,Servidor");
-  (s.log||[]).forEach(r=> L.push([r.n, `"${r.evento}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(",")));
-  L.push(""); L.push("Resumen final"); L.push(`Sets A,${s.score.setsA},Sets B,${s.score.setsB}`);
-  return L.join("\r\n");
+  const s=snap||makeLightSnapshot(); const L=[];
+  L.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
+          `${s.players.A1.name} & ${s.players.A2.name}`,
+          `${s.players.B1.name} & ${s.players.B2.name}`,
+          `Sets ${s.score.setsA}-${s.score.setsB}`].join(","));
+  L.push(""); L.push("Estadísticas por jugadora"); L.push("Jugadora,Equipo,GG,SG,ENF,FE");
+  ["A1","A2","B1","B2"].forEach(id=>{
+    const r=s.stats[id]||{GG:0,SG:0,ENF:0,FE:0}; L.push([s.players[id].name, teamOf(id), r.GG, r.SG, r.ENF, r.FE].join(","));
+  });
+  L.push(""); L.push("Historial de puntos"); L.push("N,Evento,Tipo,Equipo,Marcador,Servidor");
+  (s.log||[]).forEach(r=> L.push([r.n, `"${r.evento}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(",")));
+  L.push(""); L.push("Resumen final"); L.push(`Sets A,${s.score.setsA},Sets B,${s.score.setsB}`);
+  return L.join("\r\n");
 }
 function downloadCSV(content, filename){
-  const blob=new Blob([content],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
-  const a=document.createElement("a"); a.href=url; a.download=filename||"doblejotaenlared.csv"; document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+  const blob=new Blob([content],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=filename||"doblejotaenlared.csv"; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-/* ========= Render único (rápido) ========= */
+/* ===== Render ===== */
 function render(){
-  // Títulos
-  $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
-  $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
-  // Marcador
-  $("#setsA").textContent=state.score.setsA; $("#setsB").textContent=state.score.setsB;
-  $("#gamesA").textContent=state.score.gamesA; $("#gamesB").textContent=state.score.gamesB;
-  $("#pointsA").textContent=state.score.ptsA; $("#pointsB").textContent=state.score.ptsB;
-  $("#tennisScore").textContent=tennisStr(state.score.ptsA,state.score.ptsB);
-  $("#serverNow").textContent=serverName();
-  $("#stateNow").textContent = state.meta.finished ? "Finalizado" : (state.meta.started ? "Juego en curso" : "Listo");
-  // Punto de oro aviso
-  const box=$("#scoreBox"), note=$("#gpNote");
-  if (isGoldenPoint()){ box.classList.add("gp"); note.innerHTML = '<span class="pill-warn">PUNTO DE ORO</span>: la próxima pelota define el juego.'; }
-  else { box.classList.remove("gp"); note.textContent = "A 40–40 hay Punto de Oro."; }
+  $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
+  $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
 
-  // Log (pinta solo últimos 120 para mantener fluidez en móviles)
-  const tbody=$("#tblLog"); const cut = state.log.slice(-120);
-  tbody.innerHTML = cut.map(r=> `<tr><td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td></tr>`).join("");
+  $("#setsA").textContent=state.score.setsA; $("#setsB").textContent=state.score.setsB;
+  $("#gamesA").textContent=state.score.gamesA; $("#gamesB").textContent=state.score.gamesB;
+  $("#pointsA").textContent=state.score.ptsA; $("#pointsB").textContent=state.score.ptsB;
+  $("#tennisScore").textContent=tennisStr(state.score.ptsA,state.score.ptsB);
+  $("#serverNow").textContent=serverName();
+  $("#stateNow").textContent = state.meta.finished ? "Finalizado" : (state.meta.started ? "Juego en curso" : "Listo");
 
-  // Stats
-  const s=state.stats;
-  $("#statsPlayers").innerHTML = `
-    <div class="grid cols-2">
-      ${["A1","A2","B1","B2"].map(id=>{
-        const nm=state.players[id].name, t=teamOf(id), r=s[id];
-        return `<div class="kpi"><div class="box"><div class="help">${nm} (${t})</div>
-          <div class="help">GG ${r.GG} · SG ${r.SG} · ENF ${r.ENF} · FE ${r.FE}</div></div></div>`;
-      }).join("")}
-    </div>`;
+  const box=$("#scoreBox"), note=$("#gpNote");
+  if (isGoldenPoint()){ box.classList.add("gp"); note.innerHTML = '<span class="pill-warn">PUNTO DE ORO</span>: la próxima pelota define el juego.'; }
+  else { box.classList.remove("gp"); note.textContent = "A 40–40 hay Punto de Oro."; }
 
-  // Acciones y orden
-  updateActionLabels();
-  renderSaved();
+  const tbody=$("#tblLog"); const cut = state.log.slice(-150);
+  tbody.innerHTML = cut.map(r=> `<tr><td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td></tr>`).join("");
+
+  const s=state.stats;
+  $("#statsPlayers").innerHTML = `
+    <div class="grid cols-2">
+      ${["A1","A2","B1","B2"].map(id=>{
+        const nm=state.players[id].name, t=teamOf(id), r=s[id];
+        return `<div class="kpi"><div class="box"><div class="help">${nm} (${t})</div>
+          <div class="help">GG ${r.GG} · SG ${r.SG} · ENF ${r.ENF} · FE ${r.FE}</div></div></div>`;
+      }).join("")}
+    </div>`;
+
+  updateActionLabels();
+  renderSaved();
 }
 
-/* ========= Start/Events ========= */
+/* ===== Start / Eventos ===== */
 function startReset(){
-  syncNames();
-  state.meta.setFormat = parseInt($("#setFormat").value,10);
-  const seq = ($("#serveOrder").value||"A1,B1,A2,B2").split(",").filter(x=>["A1","A2","B1","B2"].includes(x));
-  state.serveOrder = seq.length ? seq : ["A1","B1","A2","B2"];
-  state.serveIndex=0;
-  state.score={setsA:0,setsB:0,gamesA:0,gamesB:0,ptsA:0,ptsB:0};
-  ["A1","A2","B1","B2"].forEach(id=> state.stats[id]={GG:0,SG:0,ENF:0,FE:0});
-  state.log=[]; state.undoStack=[]; state.meta.started=true; state.meta.finished=false;
-  state.meta.createdAt=new Date().toISOString(); state.meta.id="match_"+Date.now();
-  state.eventsSinceSave=0; updateServeOrderOptions(); render(); autosave();
+  syncNames();
+  state.meta.setFormat = parseInt($("#setFormat").value,10);
+  const seq = ($("#serveOrder").value||"A1,B1,A2,B2").split(",").filter(x=>["A1","A2","B1","B2"].includes(x));
+  state.serveOrder = seq.length ? seq : ["A1","B1","A2","B2"];
+  state.serveIndex=0;
+  state.score={setsA:0,setsB:0,gamesA:0,gamesB:0,ptsA:0,ptsB:0};
+  ["A1","A2","B1","B2"].forEach(id=> state.stats[id]={GG:0,SG:0,ENF:0,FE:0});
+  state.log=[]; state.undoStack=[]; state.meta.started=true; state.meta.finished=false;
+  state.meta.createdAt=new Date().toISOString(); state.meta.id="match_"+Date.now();
+  state.eventsSinceSave=0; updateServeOrderOptions(); render(); autosave();
 }
 
-// inputs → nombres/orden live
 ["#pA1","#pA2","#pB1","#pB2"].forEach(sel=>{
-  $(sel).addEventListener("input", ()=>{ syncNames(); updateServeOrderOptions(); render(); });
+  $(sel).addEventListener("input", ()=>{ syncNames(); updateServeOrderOptions(); render(); });
 });
 
-// delegación de clicks en acciones (rápido y seguro)
 $("#actionsGrid").addEventListener("click",(e)=>{
-  const b=e.target.closest("button[data-player][data-action]"); if(!b) return;
-  recordPoint(b.getAttribute("data-player"), b.getAttribute("data-action"));
+  const b=e.target.closest("button[data-player][data-action]"); if(!b) return;
+  recordPoint(b.getAttribute("data-player"), b.getAttribute("data-action"));
 });
 
-// control
 $("#btnStart").onclick=startReset;
 $("#btnUndo").onclick=undo;
 $("#btnEndSet").onclick=()=>{
-  if(!state.meta.started || state.meta.finished) return;
-  if(state.score.gamesA===state.score.gamesB){ alert("Empate de juegos: no se puede cerrar el set."); return; }
-  pushUndo(); if(state.score.gamesA>state.score.gamesB) state.score.setsA++; else state.score.setsB++;
-  state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
-  const targetSets=Math.ceil(state.meta.setFormat/2); if(state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
-  render(); autosave();
+  if(!state.meta.started || state.meta.finished) return;
+  if(state.score.gamesA===state.score.gamesB){ alert("Empate de juegos: no se puede cerrar el set."); return; }
+  pushUndo();
+  if(state.score.gamesA>state.score.gamesB) state.score.setsA++; else state.score.setsB++;
+  state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
+  const targetSets=Math.ceil(state.meta.setFormat/2);
+  if(state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
+  render(); autosave();
 };
 $("#btnEndMatch").onclick=()=>{ if(!state.meta.started) return; pushUndo(); state.meta.finished=true; render(); autosave(); };
 
@@ -474,12 +500,12 @@ $("#btnSave").onclick=saveToHistory;
 
 /* boot */
 (function boot(){
-  updateServeOrderOptions();
-  const ok=loadAutosave();
-  // reflejar nombres si venían de autosave
-  $("#pA1").value=state.players.A1.name; $("#pA2").value=state.players.A2.name;
-  $("#pB1").value=state.players.B1.name; $("#pB2").value=state.players.B2.name;
-  updateServeOrderOptions(); render();
+  updateServeOrderOptions();
+  loadAutosave(); // si hay estado, lo trae en ligero
+  // refleja nombres en inputs
+  $("#pA1").value=state.players.A1.name; $("#pA2").value=state.players.A2.name;
+  $("#pB1").value=state.players.B1.name; $("#pB2").value=state.players.B2.name;
+  updateServeOrderOptions(); render();
 })();
 </script>
 </body>
