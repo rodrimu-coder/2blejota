@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>doblejotaenlared · Marcador Pádel (Vrodrimu</title>
+<title>doblejotaenlared · Marcador Pádel (Vrodrimu)</title>
 <style>
   :root{
     --bg:#0b0f19; --panel:#101623; --line:#1f2a3d; --txt:#e5e7eb; --muted:#94a3b8;
@@ -37,24 +37,16 @@
   .log{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px}
   table{width:100%;border-collapse:collapse;font-size:12px}
   th,td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{position:sticky; top:0; background:#0f1522}
   .gp{border:2px solid var(--warn)}
   .pill-warn{background:#2a1f0e;border:1px solid #8a6a0a;color:#f8d36c;padding:2px 6px;border-radius:999px}
   .sep{height:1px;background:var(--line);margin:8px 0}
 
-  /* ===== Modal (ventana emergente) ===== */
-  .modal-backdrop{
-    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:50;
-  }
-  .modal{
-    position:fixed; inset:0; display:none; z-index:51;
-    align-items:center; justify-content:center; padding:12px;
-  }
-  .modal.show, .modal-backdrop.show{ display:flex }
-  .modal .window{
-    width:min(960px, 96vw); max-height:92vh; overflow:auto;
-    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,.4);
-  }
+  /* Modal (gráficos) */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:50}
+  .modal{position:fixed; inset:0; display:none; z-index:51; align-items:center; justify-content:center; padding:12px}
+  .modal.show, .modal-backdrop.show{display:flex}
+  .modal .window{width:min(960px, 96vw); max-height:92vh; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 10px 30px rgba(0,0,0,.4)}
   .modal .header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
   .modal .title{font-size:16px; font-weight:700}
   .modal .body{display:grid; gap:12px}
@@ -111,7 +103,11 @@
 
     <div class="sep"></div>
 
-    <h2>2) Tablero</h2>
+    <!-- NUEVO: Resumen de sets -->
+    <h2>2) Resumen de sets</h2>
+    <div id="setsHistoryBox" class="card help">Sin sets aún.</div>
+
+    <h2 style="margin-top:8px">3) Tablero</h2>
     <div class="row cols-3">
       <div class="card">
         <div id="teamATitle" class="help">Equipo A</div>
@@ -139,7 +135,7 @@
       </div>
     </div>
 
-    <h2 style="margin-top:8px">3) Registrar punto</h2>
+    <h2 style="margin-top:8px">4) Registrar punto</h2>
     <div class="row cols-2" id="actionsGrid">
       <div class="card">
         <div class="help">Equipo A — Acciones</div>
@@ -175,10 +171,27 @@
       <div class="card">
         <div class="help">Estadísticas por jugadora</div>
         <div id="statsPlayers" class="help">Sin datos.</div>
+
+        <!-- NUEVO: tabla avanzada -->
         <div class="grid cols-2" style="margin-top:8px">
+          <button id="btnToggleAdv" class="btn">📋 Mostrar tabla avanzada</button>
           <button id="btnCharts" class="btn">📊 Ver estadísticas gráficas</button>
         </div>
+        <div id="advTableWrap" class="log" style="display:none; margin-top:8px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Jugador</th><th>Pareja</th><th>GG</th><th>SG</th><th>ENF</th><th>FE</th>
+                <th>Acciones</th><th>% Acierto</th><th>Ptos a favor</th><th>Errores propios</th>
+                <th>Diferencial</th><th>Games ganados pareja</th><th>Games totales</th>
+                <th>% Games ganados</th><th>Particip acción</th><th>Set</th><th>Tipo Análisis</th>
+              </tr>
+            </thead>
+            <tbody id="advTableBody"></tbody>
+          </table>
+        </div>
       </div>
+
       <div class="card">
         <div class="help">Historial del partido</div>
         <div class="log">
@@ -194,12 +207,12 @@
       </div>
     </div>
 
-    <h2 style="margin-top:8px">4) Últimos 4 partidos guardados</h2>
+    <h2 style="margin-top:8px">5) Últimos 4 partidos guardados</h2>
     <div class="card"><div id="savedList" class="help">No hay partidos.</div></div>
   </div>
 </div>
 
-<!-- ===== Modal de Gráficos ===== -->
+<!-- Modal de gráficos -->
 <div class="modal-backdrop" id="modalBackdrop"></div>
 <div class="modal" id="modalCharts">
   <div class="window">
@@ -224,7 +237,7 @@
 </div>
 
 <script>
-/* ================= Core ================= */
+/* ====== Core ====== */
 const $  = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
@@ -236,12 +249,12 @@ const state = {
   score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
   stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
   log:[],
+  setHistory:[], // NUEVO: [{a:6,b:2}, ...]
   undoStack:[],
   eventsSinceSave:0
 };
-
-const KEY_AUTOSAVE="DJR_autosave_fast_v4";
-const KEY_SAVED  ="DJR_saved_fast_v4";
+const KEY_AUTOSAVE="DJR_autosave_fast_v5";
+const KEY_SAVED  ="DJR_saved_fast_v5";
 
 const teamOf = id => id[0]==="A" ? "A" : "B";
 const serverId = () => state.serveOrder[state.serveIndex] || "A1";
@@ -279,16 +292,6 @@ function updateServeOrderOptions(){
   if ([...sel.options].some(o=>o.value===current)) sel.value = current;
 }
 
-function updateActionLabels(){
-  const nameOf = id => state.players[id]?.name || id;
-  ["A1","A2","B1","B2"].forEach(id=>{
-    ["GG","SG","ENF","FE"].forEach(act=>{
-      const btn = document.querySelector(`button[data-player="${id}"][data-action="${act}"]`);
-      if (btn) btn.textContent = `${nameOf(id)} · ${act}`;
-    });
-  });
-}
-
 /* ===== Snapshots ligeros ===== */
 function makeLightSnapshot(src=state, logLimit=200){
   return {
@@ -298,7 +301,8 @@ function makeLightSnapshot(src=state, logLimit=200){
     serveIndex: src.serveIndex,
     score: {...src.score},
     stats: JSON.parse(JSON.stringify(src.stats)),
-    log: src.log.slice(-logLimit)
+    log: src.log.slice(-logLimit),
+    setHistory: JSON.parse(JSON.stringify(src.setHistory))
   };
 }
 function pushUndo(){
@@ -309,13 +313,7 @@ function pushUndo(){
 function undo(){
   if (!state.undoStack.length) return;
   const prev = state.undoStack.pop();
-  state.meta = prev.meta;
-  state.players = prev.players;
-  state.serveOrder = prev.serveOrder;
-  state.serveIndex = prev.serveIndex;
-  state.score = prev.score;
-  state.stats = prev.stats;
-  state.log = prev.log;
+  Object.assign(state, {...state, ...prev});
   requestRender();
 }
 
@@ -336,6 +334,8 @@ function closeGameIfNeeded(){
 function checkSetEnd(){
   const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
   if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
+    // guardar historial de set antes de resetear
+    state.setHistory.push({a:gA,b:gB});
     if (gA>gB) state.score.setsA++; else state.score.setsB++;
     state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
     const targetSets = Math.ceil(state.meta.setFormat/2);
@@ -380,15 +380,8 @@ function loadAutosave(){
   try{
     const raw = localStorage.getItem(KEY_AUTOSAVE); if(!raw) return false;
     const s = JSON.parse(raw);
-    state.meta = s.meta;
-    state.players = s.players;
-    state.serveOrder = s.serveOrder;
-    state.serveIndex = s.serveIndex;
-    state.score = s.score;
-    state.stats = s.stats;
-    state.log = s.log || [];
-    state.undoStack=[];
-    state.eventsSinceSave=0;
+    Object.assign(state, {...state, ...s});
+    state.undoStack=[]; state.eventsSinceSave=0;
     return true;
   }catch(e){ return false; }
 }
@@ -401,6 +394,127 @@ function saveToHistory(){
     renderSaved(); alert("Guardado en historial.");
   }catch(e){ alert("No se pudo guardar."); }
 }
+
+/* ===== CSV ===== */
+const teamLabel = id => teamOf(id);
+function buildCSV(snap){
+  const s=snap||state; const L=[];
+  L.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
+          `${s.players.A1.name} & ${s.players.A2.name}`,
+          `${s.players.B1.name} & ${s.players.B2.name}`,
+          `Sets ${s.score.setsA}-${s.score.setsB}`].join(","));
+  // sets history
+  if (s.setHistory?.length){
+    L.push(""); L.push("Historial de sets"); L.push("Set,A,B");
+    s.setHistory.forEach((sh,i)=>L.push(`${i+1},${sh.a},${sh.b}`));
+  }
+  L.push(""); L.push("Estadísticas por jugadora"); L.push("Jugadora,Equipo,GG,SG,ENF,FE");
+  ["A1","A2","B1","B2"].forEach(id=>{
+    const r=s.stats[id]||{GG:0,SG:0,ENF:0,FE:0}; L.push([s.players[id].name, teamLabel(id), r.GG, r.SG, r.ENF, r.FE].join(","));
+  });
+  L.push(""); L.push("Historial de puntos"); L.push("N,Evento,Tipo,Equipo,Marcador,Servidor");
+  (s.log||[]).forEach(r=> L.push([r.n, `"${r.evento}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(",")));
+  L.push(""); L.push("Resumen final"); L.push(`Sets A,${s.score.setsA},Sets B,${s.score.setsB}`);
+  return L.join("\r\n");
+}
+function downloadCSV(content, filename){
+  const blob=new Blob([content],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=filename||"doblejotaenlared.csv"; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ===== Render con RAF ===== */
+let renderScheduled=false;
+function requestRender(){ if (!renderScheduled){ renderScheduled=true; requestAnimationFrame(render); } }
+
+function render(){
+  renderScheduled=false;
+
+  // Títulos y tablero
+  $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
+  $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
+
+  $("#setsA").textContent=state.score.setsA; $("#setsB").textContent=state.score.setsB;
+  $("#gamesA").textContent=state.score.gamesA; $("#gamesB").textContent=state.score.gamesB;
+  $("#pointsA").textContent=state.score.ptsA; $("#pointsB").textContent=state.score.ptsB;
+  $("#tennisScore").textContent=tennisStr(state.score.ptsA,state.score.ptsB);
+  $("#serverNow").textContent=serverName();
+  $("#stateNow").textContent = state.meta.finished ? "Finalizado" : (state.meta.started ? "Juego en curso" : "Listo");
+
+  // Punto de oro
+  const box=$("#scoreBox"), note=$("#gpNote");
+  if (isGoldenPoint()){ box.classList.add("gp"); note.innerHTML = '<span class="pill-warn">PUNTO DE ORO</span>: la próxima pelota define el juego.'; }
+  else { box.classList.remove("gp"); note.textContent = "A 40–40 hay Punto de Oro."; }
+
+  // Historial de sets — NUEVO
+  const sh = state.setHistory;
+  const curr = `Set ${sh.length+1}: jugando (${state.score.gamesA}–${state.score.gamesB})`;
+  const items = sh.map((s,i)=>`<div class="badge">Set ${i+1}: ${s.a}–${s.b}</div>`).join(" ");
+  $("#setsHistoryBox").innerHTML = (sh.length? items+" " : "") + `<div class="badge">${curr}</div>`;
+
+  // Log visible
+  const tbody=$("#tblLog"); const cut = state.log.slice(-80);
+  tbody.innerHTML = cut.map(r=> `<tr><td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td></tr>`).join("");
+
+  // KPIs por jugadora (compacto)
+  const s=state.stats;
+  $("#statsPlayers").innerHTML = `
+    <div class="grid cols-2">
+      ${["A1","A2","B1","B2"].map(id=>{
+        const nm=state.players[id].name, t=teamOf(id), r=s[id];
+        return `<div class="kpi"><div class="box"><div class="help">${nm} (${t})</div>
+          <div class="help">GG ${r.GG} · SG ${r.SG} · ENF ${r.ENF} · FE ${r.FE}</div></div></div>`;
+      }).join("")}
+    </div>`;
+
+  // Tabla avanzada — NUEVO
+  renderAdvancedTable();
+
+  // Últimos guardados
+  renderSaved();
+
+  // Actualiza etiquetas de botones de acción (con nombres)
+  updateActionLabels();
+}
+
+/* ===== Tabla Avanzada (como tu Excel) ===== */
+function renderAdvancedTable(){
+  const wrap = $("#advTableWrap");
+  if (wrap.style.display === "none") return; // si está oculta, no recalcular
+
+  const totals = ["A1","A2","B1","B2"].reduce((acc,id)=>{
+    const r=state.stats[id]; acc.actions += (r.GG+r.SG+r.ENF+r.FE); return acc;
+  }, {actions:0});
+  const gamesTotal = state.setHistory.reduce((n,s)=>n+s.a+s.b,0) + (state.score.gamesA+state.score.gamesB);
+  const gamesA = state.setHistory.reduce((n,s)=>n+s.a,0) + state.score.gamesA;
+  const gamesB = state.setHistory.reduce((n,s)=>n+s.b,0) + state.score.gamesB;
+
+  const rows = ["A1","A2","B1","B2"].map(id=>{
+    const nm=state.players[id].name;
+    const team=teamOf(id);
+    const r=state.stats[id];
+    const acciones = r.GG+r.SG+r.ENF+r.FE;
+    const acierto = acciones? Math.round(((r.GG+r.SG)/acciones)*100) : 0;
+    const favor   = r.GG+r.SG;
+    const errores = r.ENF+r.FE;
+    const dif     = favor-errores;
+    const gamesGanadosPareja = (team==="A")? gamesA : gamesB;
+    const pctGames = gamesTotal? Math.round((gamesGanadosPareja/gamesTotal)*100) : 0;
+    const particip = totals.actions? ((acciones/totals.actions)*100).toFixed(1)+"%" : "0%";
+    return `
+      <tr>
+        <td>${nm}</td><td>${team}</td>
+        <td>${r.GG}</td><td>${r.SG}</td><td>${r.ENF}</td><td>${r.FE}</td>
+        <td>${acciones}</td><td>${acierto}%</td>
+        <td>${favor}</td><td>${errores}</td><td>${dif}</td>
+        <td>${gamesGanadosPareja}</td><td>${gamesTotal}</td><td>${pctGames}%</td>
+        <td>${particip}</td><td>Partido</td><td>Partido</td>
+      </tr>`;
+  }).join("");
+  $("#advTableBody").innerHTML = rows || `<tr><td colspan="17">Sin datos</td></tr>`;
+}
+
+/* ===== Guardados ===== */
 function renderSaved(){
   const box=$("#savedList"); const arr=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
   if(!arr.length){ box.textContent="No hay partidos."; return; }
@@ -408,8 +522,9 @@ function renderSaved(){
     const t=new Date(m.savedAt||m.meta?.createdAt||Date.now()).toLocaleString();
     const A=`${m.players.A1.name} & ${m.players.A2.name}`, B=`${m.players.B1.name} & ${m.players.B2.name}`;
     const res=`${m.score.setsA}-${m.score.setsB} sets`;
+    const sets = (m.setHistory||[]).map((s,j)=>`Set ${j+1}: ${s.a}-${s.b}`).join(" · ");
     return `<div class="score">
-      <div><div class="help">#${i+1} · ${t}</div><div>${A} <span class="help">vs</span> ${B}</div><div class="help">${res}</div></div>
+      <div><div class="help">#${i+1} · ${t}</div><div>${A} <span class="help">vs</span> ${B}</div><div class="help">${res}${sets? " · "+sets:""}</div></div>
       <div class="grid" style="grid-template-columns:auto auto auto;gap:6px">
         <button class="btn ghost" data-load="${i}">Cargar</button>
         <button class="btn bad" data-del="${i}">Borrar</button>
@@ -420,8 +535,7 @@ function renderSaved(){
   box.querySelectorAll("[data-load]").forEach(b=> b.onclick=()=>{
     const idx=+b.getAttribute("data-load"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
     const pick=arr2[idx]; if(!pick)return;
-    state.meta = pick.meta; state.players = pick.players; state.serveOrder = pick.serveOrder;
-    state.serveIndex = pick.serveIndex; state.score = pick.score; state.stats = pick.stats; state.log = pick.log||[];
+    Object.assign(state, {...state, ...pick});
     state.undoStack=[]; state.eventsSinceSave=0;
     requestRender(); window.scrollTo({top:0,behavior:"smooth"});
   });
@@ -435,85 +549,20 @@ function renderSaved(){
   });
 }
 
-/* ===== CSV ===== */
-function buildCSV(snap){
-  const s=snap||state; const L=[];
-  L.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
-          `${s.players.A1.name} & ${s.players.A2.name}`,
-          `${s.players.B1.name} & ${s.players.B2.name}`,
-          `Sets ${s.score.setsA}-${s.score.setsB}`].join(","));
-  L.push(""); L.push("Estadísticas por jugadora"); L.push("Jugadora,Equipo,GG,SG,ENF,FE");
-  ["A1","A2","B1","B2"].forEach(id=>{
-    const r=s.stats[id]||{GG:0,SG:0,ENF:0,FE:0}; L.push([s.players[id].name, teamOf(id), r.GG, r.SG, r.ENF, r.FE].join(","));
-  });
-  L.push(""); L.push("Historial de puntos"); L.push("N,Evento,Tipo,Equipo,Marcador,Servidor");
-  (s.log||[]).forEach(r=> L.push([r.n, `"${r.evento}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(",")));
-  L.push(""); L.push("Resumen final"); L.push(`Sets A,${s.score.setsA},Sets B,${s.score.setsB}`);
-  return L.join("\r\n");
-}
-function downloadCSV(content, filename){
-  const blob=new Blob([content],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
-  const a=document.createElement("a"); a.href=url; a.download=filename||"doblejotaenlared.csv"; document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-
-/* ===== Render con requestAnimationFrame (anti-freeze) ===== */
-let renderScheduled=false;
-function requestRender(){ if (!renderScheduled){ renderScheduled=true; requestAnimationFrame(render); } }
-
-function render(){
-  renderScheduled=false;
-
-  $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
-  $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
-
-  $("#setsA").textContent=state.score.setsA; $("#setsB").textContent=state.score.setsB;
-  $("#gamesA").textContent=state.score.gamesA; $("#gamesB").textContent=state.score.gamesB;
-  $("#pointsA").textContent=state.score.ptsA; $("#pointsB").textContent=state.score.ptsB;
-  $("#tennisScore").textContent=tennisStr(state.score.ptsA,state.score.ptsB);
-  $("#serverNow").textContent=serverName();
-  $("#stateNow").textContent = state.meta.finished ? "Finalizado" : (state.meta.started ? "Juego en curso" : "Listo");
-
-  const box=$("#scoreBox"), note=$("#gpNote");
-  if (isGoldenPoint()){ box.classList.add("gp"); note.innerHTML = '<span class="pill-warn">PUNTO DE ORO</span>: la próxima pelota define el juego.'; }
-  else { box.classList.remove("gp"); note.textContent = "A 40–40 hay Punto de Oro."; }
-
-  const tbody=$("#tblLog"); const cut = state.log.slice(-80);
-  tbody.innerHTML = cut.map(r=> `<tr><td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td></tr>`).join("");
-
-  const s=state.stats;
-  $("#statsPlayers").innerHTML = `
-    <div class="grid cols-2">
-      ${["A1","A2","B1","B2"].map(id=>{
-        const nm=state.players[id].name, t=teamOf(id), r=s[id];
-        return `<div class="kpi"><div class="box"><div class="help">${nm} (${t})</div>
-          <div class="help">GG ${r.GG} · SG ${r.SG} · ENF ${r.ENF} · FE ${r.FE}</div></div></div>`;
-      }).join("")}
-    </div>`;
-
-  updateActionLabels();
-  renderSaved();
-}
-
-/* ===== Modal + Gráficos (Chart.js) ===== */
-let ChartLib = null;
-let chartBars = null;
-let chartPie  = null;
-
+/* ===== Gráficos (modal) ===== */
+let ChartLib=null, chartBars=null, chartPie=null;
 function loadChartJS(){
-  return new Promise((resolve, reject)=>{
+  return new Promise((resolve,reject)=>{
     if (ChartLib) return resolve(ChartLib);
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-    s.onload = ()=>{ ChartLib = window.Chart; resolve(ChartLib); };
-    s.onerror = ()=> reject(new Error("No se pudo cargar Chart.js"));
+    const s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    s.onload=()=>{ ChartLib=window.Chart; resolve(ChartLib); };
+    s.onerror=()=>reject(new Error("No se pudo cargar Chart.js"));
     document.head.appendChild(s);
   });
 }
-
 function openChartsModal(){
   loadChartJS().then(()=>{
-    // Preparar datos
     const labelsPlayers = ["A1","A2","B1","B2"].map(id => state.players[id].name || id);
     const GG = ["A1","A2","B1","B2"].map(id => state.stats[id].GG);
     const SG = ["A1","A2","B1","B2"].map(id => state.stats[id].SG);
@@ -525,54 +574,24 @@ function openChartsModal(){
     const winB = (state.stats.B1.GG+state.stats.B1.SG) + (state.stats.B2.GG+state.stats.B2.SG);
     const errB = (state.stats.B1.ENF+state.stats.B1.FE) + (state.stats.B2.ENF+state.stats.B2.FE);
 
-    // Limpiar instancias anteriores
     if (chartBars){ chartBars.destroy(); chartBars=null; }
     if (chartPie){ chartPie.destroy(); chartPie=null; }
 
-    // Crear gráficas
-    const ctxBars = document.getElementById("chartBars").getContext("2d");
-    chartBars = new ChartLib(ctxBars, {
+    chartBars = new ChartLib(document.getElementById("chartBars").getContext("2d"), {
       type:'bar',
-      data:{
-        labels: labelsPlayers,
-        datasets:[
-          { label:'GG', data:GG },
-          { label:'SG', data:SG },
-          { label:'ENF',data:ENF },
-          { label:'FE', data:FE }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:'#cbd5e1' } } },
-        scales:{
-          x:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2a3d' } },
-          y:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2a3d' }, beginAtZero:true, precision:0 }
-        }
-      }
+      data:{ labels:labelsPlayers, datasets:[ {label:'GG',data:GG}, {label:'SG',data:SG}, {label:'ENF',data:ENF}, {label:'FE',data:FE} ] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#cbd5e1' } } }, scales:{ x:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2a3d' } }, y:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2a3d' }, beginAtZero:true, precision:0 } } }
     });
 
-    const ctxPie = document.getElementById("chartPie").getContext("2d");
-    chartPie = new ChartLib(ctxPie, {
+    chartPie = new ChartLib(document.getElementById("chartPie").getContext("2d"), {
       type:'pie',
-      data:{
-        labels:[`A · Ganadores (${winA})`,`A · Errores (${errA})`,`B · Ganadores (${winB})`,`B · Errores (${errB})`],
-        datasets:[{ data:[winA,errA,winB,errB] }]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:'#cbd5e1' } } }
-      }
+      data:{ labels:[`A · Ganadores (${winA})`,`A · Errores (${errA})`,`B · Ganadores (${winB})`,`B · Errores (${errB})`], datasets:[{ data:[winA,errA,winB,errB] }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#cbd5e1' } } } }
     });
 
-    // Mostrar modal
     $("#modalBackdrop").classList.add("show");
     $("#modalCharts").classList.add("show");
-  }).catch(err=>{
-    alert("No pude cargar los gráficos: " + err.message);
-  });
+  }).catch(e=> alert("No pude cargar los gráficos: "+e.message));
 }
 function closeChartsModal(){
   if (chartBars){ chartBars.destroy(); chartBars=null; }
@@ -590,15 +609,13 @@ function startReset(){
   state.serveIndex=0;
   state.score={setsA:0,setsB:0,gamesA:0,gamesB:0,ptsA:0,ptsB:0};
   ["A1","A2","B1","B2"].forEach(id=> state.stats[id]={GG:0,SG:0,ENF:0,FE:0});
-  state.log=[]; state.undoStack=[]; state.meta.started=true; state.meta.finished=false;
+  state.log=[]; state.setHistory=[]; state.undoStack=[]; state.meta.started=true; state.meta.finished=false;
   state.meta.createdAt=new Date().toISOString(); state.meta.id="match_"+Date.now();
   state.eventsSinceSave=0; updateServeOrderOptions(); requestRender(); autosave();
 }
-
 ["#pA1","#pA2","#pB1","#pB2"].forEach(sel=>{
   $(sel).addEventListener("input", ()=>{ syncNames(); updateServeOrderOptions(); requestRender(); });
 });
-
 $("#actionsGrid").addEventListener("click",(e)=>{
   const b=e.target.closest("button[data-player][data-action]"); if(!b) return;
   recordPoint(b.getAttribute("data-player"), b.getAttribute("data-action"));
@@ -610,6 +627,8 @@ $("#btnEndSet").onclick=()=>{
   if(!state.meta.started || state.meta.finished) return;
   if(state.score.gamesA===state.score.gamesB){ alert("Empate de juegos: no se puede cerrar el set."); return; }
   pushUndo();
+  // guarda el set actual en historial y avanza set
+  state.setHistory.push({a:state.score.gamesA, b:state.score.gamesB});
   if(state.score.gamesA>state.score.gamesB) state.score.setsA++; else state.score.setsB++;
   state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
   const targetSets=Math.ceil(state.meta.setFormat/2);
@@ -621,11 +640,18 @@ $("#btnEndMatch").onclick=()=>{ if(!state.meta.started) return; pushUndo(); stat
 $("#btnExport").onclick=()=> downloadCSV(buildCSV(), "doblejotaenlared.csv");
 $("#btnSave").onclick=saveToHistory;
 
-/* Botones del modal */
 $("#btnCharts").onclick=openChartsModal;
 $("#btnCloseModal").onclick=closeChartsModal;
 $("#btnCloseModal2").onclick=closeChartsModal;
 $("#modalBackdrop").onclick=closeChartsModal;
+
+$("#btnToggleAdv").onclick=()=>{
+  const wrap=$("#advTableWrap");
+  const showing = wrap.style.display!=="none";
+  wrap.style.display = showing ? "none" : "block";
+  $("#btnToggleAdv").textContent = showing ? "📋 Mostrar tabla avanzada" : "📋 Ocultar tabla avanzada";
+  requestRender();
+};
 
 /* boot */
 (function boot(){
