@@ -57,7 +57,20 @@
   .narrative-box{background:#0f1522;border:1px solid var(--line);border-radius:10px;padding:10px;white-space:pre-wrap;line-height:1.5}
   /* Footer crédito */
   .footer-credit{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:10px;color:#9fb6c7}
-  .footer-credit img{height:22px;display:block;filter:drop-shadow(0 0 8px rgba(0,0,0,.2))}
+  .footer-credit img{height:34px;display:block;filter:drop-shadow(0 0 8px rgba(0,0,0,.2))}
+/* === Estilo especial para botones de error (ENF y FE) === */
+button[data-action="ENF"],
+button[data-action="FE"] {
+  background-color: #7f1d1d !important; /* rojo oscuro */
+  border-color: #b91c1c !important;
+  color: #f8fafc !important;            /* texto claro */
+  font-weight: 600;
+}
+button[data-action="ENF"]:active,
+button[data-action="FE"]:active {
+  background-color: #991b1b !important; /* más intenso al presionar */
+}
+
 </style>
 </head>
 <body>
@@ -180,7 +193,7 @@
 
     <div class="row cols-2" style="margin-top:8px">
       <div class="card">
-        <div class="help">Estadísticas por jugadora</div>
+        <div class="help">Estadísticas por jugador(a)</div>
         <div id="statsPlayers" class="help">Sin datos.</div>
 
         <div class="grid cols-2" style="margin-top:8px">
