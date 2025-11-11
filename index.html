@@ -176,20 +176,20 @@
 </div>
 
 <script>
-/* ========= Estado y helpers ========= */
+/* ========= Estado y helpers (CORREGIDO) ========= */
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 const state = {
-  meta:{ started:false, finished:false, setFormat:3, createdAt:null, id:null },
-  players:{ A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"} },
-  serveOrder:["A1","B1","A2","B2"],
-  serveIndex:0,
-  score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
-  stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
-  log:[],
-  undoStack:[],
-  eventsSinceSave:0
+  meta:{ started:false, finished:false, setFormat:3, createdAt:null, id:null },
+  players:{ A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"} },
+  serveOrder:["A1","B1","A2","B2"],
+  serveIndex:0,
+  score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
+  stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
+  log:[],
+  undoStack:[],
+  eventsSinceSave:0
 };
 const KEY_AUTOSAVE="DJR_autosave_fast_v1", KEY_SAVED="DJR_saved_fast_v1";
 
@@ -201,42 +201,54 @@ const nextServer = () => state.serveIndex = (state.serveIndex + 1) % state.serve
 const resetGamePoints = () => { state.score.ptsA = 0; state.score.ptsB = 0; };
 
 function tennisStr(a,b){
-  const map = ["0","15","30","40"];
-  if (a>=3 && b>=3 && a===b) return "GP"; // 40-40
-  const sa = (a>=3)?"40":(map[a]||"40"), sb = (b>=3)?"40":(map[b]||"40");
-  return `${sa} — ${sb}`;
+  const map = ["0","15","30","40"];
+
+  // *** CORRECCIÓN: Manejar marcador de punto de juego ganado ***
+  // Si un equipo tiene 4+ puntos y la diferencia es 1 (Punto de Oro) o más (Punto normal)
+  if ((a >= 4 || b >= 4) && Math.abs(a-b)>=1) { 
+    if (a > b) return "Gana A (Juego)";
+    if (b > a) return "Gana B (Juego)";
+  }
+  
+  // Caso especial de Punto de Oro (40-40)
+  if (a>=3 && b>=3 && a===b) return "GP"; 
+  
+  // Marcadores normales
+  const sa = (a>=3)?"40":(map[a]||"40"), sb = (b>=3)?"40":(map[b]||"40");
+  return `${sa} — ${sb}`;
 }
+
 function isGoldenPoint(){ return state.score.ptsA>=3 && state.score.ptsB>=3 && state.score.ptsA===state.score.ptsB; }
 
 function syncNames(){
-  state.players.A1.name = $("#pA1").value.trim() || "A1";
-  state.players.A2.name = $("#pA2").value.trim() || "A2";
-  state.players.B1.name = $("#pB1").value.trim() || "B1";
-  state.players.B2.name = $("#pB2").value.trim() || "B2";
+  state.players.A1.name = $("#pA1").value.trim() || "A1";
+  state.players.A2.name = $("#pA2").value.trim() || "A2";
+  state.players.B1.name = $("#pB1").value.trim() || "B1";
+  state.players.B2.name = $("#pB2").value.trim() || "B2";
 }
 
 function updateServeOrderOptions(){
-  const n = state.players;
-  const opts = [
-    ["A1,B1,A2,B2", `A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name}) → B2 (${n.B2.name})`],
-    ["A1,B2,A2,B1", `A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name}) → B1 (${n.B1.name})`],
-    ["B1,A1,B2,A2", `B1 (${n.B1.name}) → A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name})`],
-    ["B2,A1,B1,A2", `B2 (${n.B2.name}) → A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name})`],
-  ];
-  const sel = $("#serveOrder");
-  sel.innerHTML = opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
-  const current = state.serveOrder.join(",");
-  if ([...sel.options].some(o=>o.value===current)) sel.value = current;
+  const n = state.players;
+  const opts = [
+    ["A1,B1,A2,B2", `A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name}) → B2 (${n.B2.name})`],
+    ["A1,B2,A2,B1", `A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name}) → B1 (${n.B1.name})`],
+    ["B1,A1,B2,A2", `B1 (${n.B1.name}) → A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name})`],
+    ["B2,A1,B1,A2", `B2 (${n.B2.name}) → A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name})`],
+  ];
+  const sel = $("#serveOrder");
+  sel.innerHTML = opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  const current = state.serveOrder.join(",");
+  if ([...sel.options].some(o=>o.value===current)) sel.value = current;
 }
 
 function updateActionLabels(){
-  const nameOf = id => state.players[id]?.name || id;
-  ["A1","A2","B1","B2"].forEach(id=>{
-    ["GG","SG","ENF","FE"].forEach(act=>{
-      const btn = document.querySelector(`button[data-player="${id}"][data-action="${act}"]`);
-      if (btn) btn.textContent = `${nameOf(id)} · ${act}`;
-    });
-  });
+  const nameOf = id => state.players[id]?.name || id;
+  ["A1","A2","B1","B2"].forEach(id=>{
+    ["GG","SG","ENF","FE"].forEach(act=>{
+      const btn = document.querySelector(`button[data-player="${id}"][data-action="${act}"]`);
+      if (btn) btn.textContent = `${nameOf(id)} · ${act}`;
+    });
+  });
 }
 
 function pushUndo(){ state.undoStack.push(deepClone(state)); if (state.undoStack.length>100) state.undoStack.shift(); }
@@ -244,56 +256,66 @@ function undo(){ if(!state.undoStack.length) return; const prev=state.undoStack.
 
 /* ========= Lógica de juego ========= */
 function closeGameIfNeeded(){
-  const a = state.score.ptsA, b = state.score.ptsB;
-  if (a>=3 && b>=3 && a===b) return false; // GP no cierra
-  let winner=null;
-  if (a>=4 || b>=4) winner = (a>b)?"A":"B";
-  else if (a>=3 && b>=3 && a!==b) winner = (a>b)?"A":"B";
-  if (winner){
-    if (winner==="A") state.score.gamesA++; else state.score.gamesB++;
-    resetGamePoints(); nextServer();
-    return true;
-  }
-  return false;
+  const a = state.score.ptsA, b = state.score.ptsB;
+  
+  // Si estamos en 40-40 (3-3), no cerramos el juego, el siguiente punto lo cerrará
+  if (a>=3 && b>=3 && a===b) return false; 
+  
+  let winner=null;
+  // El juego se cierra si un equipo tiene 4 o más puntos Y tiene una ventaja de al menos 1 punto (para GP)
+  // o al menos 2 puntos (para juegos normales). En Padel GP, la condición a>=4 o b>=4 
+  // Y Math.abs(a-b) >= 1 (la cual está implícita si no retornamos en 3-3) es suficiente.
+  
+  if (a>=4 || b>=4) winner = (a>b)?"A":"B";
+  
+  // Ya no necesitamos la lógica de Ventaja (a>=3 && b>=3 && a!==b) porque 
+  // se maneja con la condición de a>=4 o b>=4 en el Punto de Oro.
+  
+  if (winner){
+    if (winner==="A") state.score.gamesA++; else state.score.gamesB++;
+    resetGamePoints(); nextServer();
+    return true;
+  }
+  return false;
 }
 
 function checkSetEnd(){
-  const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
-  if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
-    if (gA>gB) state.score.setsA++; else state.score.setsB++;
-    state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
-    const targetSets = Math.ceil(state.meta.setFormat/2);
-    if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
-  }
+  const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
+  if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
+    if (gA>gB) state.score.setsA++; else state.score.setsB++;
+    state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
+    const targetSets = Math.ceil(state.meta.setFormat/2);
+    if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
+  }
 }
 
 function recordPoint(playerId, type){
-  if (!state.meta.started || state.meta.finished) return;
-  pushUndo();
+  if (!state.meta.started || state.meta.finished) return;
+  pushUndo();
 
-  let winnerTeam;
-  if (type==="GG" || type==="SG"){
-    winnerTeam = teamOf(playerId);
-    state.stats[playerId][type] += 1;
-  } else {
-    state.stats[playerId][type] += 1;
-    winnerTeam = teamOf(playerId)==="A" ? "B" : "A";
-  }
-  if (winnerTeam==="A") state.score.ptsA++; else state.score.ptsB++;
+  let winnerTeam;
+  if (type==="GG" || type==="SG"){
+    winnerTeam = teamOf(playerId);
+    state.stats[playerId][type] += 1;
+  } else {
+    state.stats[playerId][type] += 1;
+    winnerTeam = teamOf(playerId)==="A" ? "B" : "A";
+  }
+  if (winnerTeam==="A") state.score.ptsA++; else state.score.ptsB++;
 
-  const preGameStr = `${tennisStr(state.score.ptsA, state.score.ptsB)} | Juegos ${state.score.gamesA}-${state.score.gamesB}`;
+  // Captura el marcador ANTES de que el juego se cierre y reseteen los puntos.
+  const preGameStr = `${tennisStr(state.score.ptsA, state.score.ptsB)} | Juegos ${state.score.gamesA}-${state.score.gamesB}`;
 
-  const closed = closeGameIfNeeded();
-  if (closed) checkSetEnd();
+  const closed = closeGameIfNeeded();
+  if (closed) checkSetEnd();
 
-  const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
-  state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr: preGameStr, server: serverName() });
+  const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
+  state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr: preGameStr, server: serverName() });
 
-  state.eventsSinceSave++;
-  render();
-  if (state.eventsSinceSave>=5) { autosave(); state.eventsSinceSave=0; }
+  state.eventsSinceSave++;
+  render();
+  if (state.eventsSinceSave>=5) { autosave(); state.eventsSinceSave=0; }
 }
-
 /* ========= Persistencia ========= */
 function autosave(){ try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(state)); }catch(e){} }
 function loadAutosave(){
