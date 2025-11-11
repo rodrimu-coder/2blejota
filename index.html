@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>doblejotaenlared · Score (Vrodimu10 · fix undo)</title>
+<title>doblejotaenlared · Marcador Pádel Vrodrimu</title>
 <style>
   :root{
-    --bg:#0b0f19; --panel:#101623; --line:#1e293b; --txt:#e5e7eb; --muted:#94a3b8;
-    --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --ring:#22d3ee;
+    --bg:#0b0f19; --panel:#101623; --line:#1f2a3d; --txt:#e5e7eb; --muted:#94a3b8;
+    --okBg:#0e2a19; --okBorder:#14532d; --badBg:#2a1111; --badBorder:#7f1d1d; --ring:#22d3ee; --warn:#f59e0b;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
@@ -23,8 +23,8 @@
   input:focus,select:focus{border-color:var(--ring)}
   .btn{cursor:pointer;border:1px solid var(--line);background:#0f172a;color:var(--txt);padding:10px;border-radius:10px;font-weight:600}
   .btn:active{transform:translateY(1px)}
-  .btn.ok{background:#0e2a19;border-color:#14532d}
-  .btn.bad{background:#2a1111;border-color:#7f1d1d}
+  .btn.ok{background:var(--okBg);border-color:var(--okBorder)}
+  .btn.bad{background:var(--badBg);border-color:var(--badBorder)}
   .btn.ghost{background:transparent}
   .grid{display:grid;gap:8px}
   .grid.cols-2{grid-template-columns:1fr 1fr}
@@ -44,7 +44,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>🎾 doblejotaenlared — Marcador de Pádel (Vrodrimu)</h1>
+  <h1>🎾 doblejotaenlared — Marcador de Pádel (punto de oro)</h1>
 
   <div class="card">
     <h2>1) Configuración</h2>
@@ -176,8 +176,8 @@
 </div>
 
 <script>
-/* ===== Helpers y estado ===== */
-const $ = s => document.querySelector(s);
+/* ================= Core ================= */
+const $  = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 const state = {
@@ -192,10 +192,9 @@ const state = {
   eventsSinceSave:0
 };
 
-const KEY_AUTOSAVE="DJR_autosave_fast_v2";
-const KEY_SAVED  ="DJR_saved_fast_v2";
+const KEY_AUTOSAVE="DJR_autosave_fast_v3";
+const KEY_SAVED  ="DJR_saved_fast_v3";
 
-/* ===== util ===== */
 const teamOf = id => id[0]==="A" ? "A" : "B";
 const serverId = () => state.serveOrder[state.serveIndex] || "A1";
 const serverName = () => state.players[serverId()]?.name || serverId();
@@ -204,7 +203,7 @@ const resetGamePoints = () => { state.score.ptsA = 0; state.score.ptsB = 0; };
 
 function tennisStr(a,b){
   const map = ["0","15","30","40"];
-  if (a>=3 && b>=3 && a===b) return "GP"; // 40–40
+  if (a>=3 && b>=3 && a===b) return "GP";
   const sa = (a>=3)?"40":(map[a]||"40");
   const sb = (b>=3)?"40":(map[b]||"40");
   return `${sa} — ${sb}`;
@@ -242,9 +241,8 @@ function updateActionLabels(){
   });
 }
 
-/* ===== Snapshots ligeros (¡clave para evitar cuelgues!) ===== */
-function makeLightSnapshot(src=state){
-  // Excluye undoStack y cuenta de eventos; incluye lo necesario para reanudar.
+/* ===== Snapshots ligeros ===== */
+function makeLightSnapshot(src=state, logLimit=100){
   return {
     meta: {...src.meta},
     players: JSON.parse(JSON.stringify(src.players)),
@@ -252,18 +250,17 @@ function makeLightSnapshot(src=state){
     serveIndex: src.serveIndex,
     score: {...src.score},
     stats: JSON.parse(JSON.stringify(src.stats)),
-    log: JSON.parse(JSON.stringify(src.log))
+    log: src.log.slice(-logLimit) // <- evita cuelgues
   };
 }
 function pushUndo(){
-  const snap = makeLightSnapshot();
+  const snap = makeLightSnapshot(state, 100);
   state.undoStack.push(snap);
-  if (state.undoStack.length>60) state.undoStack.shift();
+  if (state.undoStack.length>20) state.undoStack.shift(); // <- tope bajo
 }
 function undo(){
   if (!state.undoStack.length) return;
   const prev = state.undoStack.pop();
-  // Restaurar SOLO desde snapshot ligero
   state.meta = prev.meta;
   state.players = prev.players;
   state.serveOrder = prev.serveOrder;
@@ -271,19 +268,16 @@ function undo(){
   state.score = prev.score;
   state.stats = prev.stats;
   state.log = prev.log;
-  // no restauramos undoStack previo para evitar cascadas
-  render();
+  requestRender();
 }
 
 /* ===== Juego ===== */
 function closeGameIfNeeded(){
   const a = state.score.ptsA, b = state.score.ptsB;
   if (a>=3 && b>=3 && a===b) return false; // GP no cierra
-
   let winner=null;
   if (a>=4 || b>=4) winner = (a>b) ? "A" : "B";
   else if (a>=3 && b>=3 && a!==b) winner = (a>b) ? "A" : "B";
-
   if (winner){
     if (winner==="A") state.score.gamesA++; else state.score.gamesB++;
     resetGamePoints(); nextServer();
@@ -291,7 +285,6 @@ function closeGameIfNeeded(){
   }
   return false;
 }
-
 function checkSetEnd(){
   const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
   if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
@@ -304,7 +297,6 @@ function checkSetEnd(){
 
 function recordPoint(playerId, type){
   if (!state.meta.started || state.meta.finished) return;
-
   pushUndo();
 
   let winnerTeam;
@@ -326,36 +318,36 @@ function recordPoint(playerId, type){
   const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
   state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr: eventGameStr, server: serverName() });
 
+  if (state.log.length>10000) state.log.splice(0, state.log.length-10000); // protección extrema
   state.eventsSinceSave++;
-  render();
+  requestRender();
   if (state.eventsSinceSave>=5){ autosave(); state.eventsSinceSave=0; }
 }
 
 /* ===== Persistencia ===== */
 function autosave(){
-  try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot())); }catch(e){}
+  try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot(state, 200))); }catch(e){}
 }
 function loadAutosave(){
   try{
     const raw = localStorage.getItem(KEY_AUTOSAVE); if(!raw) return false;
     const s = JSON.parse(raw);
-    // Reconstruir estado desde snapshot ligero
     state.meta = s.meta;
     state.players = s.players;
     state.serveOrder = s.serveOrder;
     state.serveIndex = s.serveIndex;
     state.score = s.score;
     state.stats = s.stats;
-    state.log = s.log;
-    state.undoStack = []; // empezamos limpio
-    state.eventsSinceSave = 0;
+    state.log = s.log || [];
+    state.undoStack=[];
+    state.eventsSinceSave=0;
     return true;
   }catch(e){ return false; }
 }
 function saveToHistory(){
   try{
     const arr = JSON.parse(localStorage.getItem(KEY_SAVED) || "[]");
-    const snap = makeLightSnapshot(); snap.savedAt = new Date().toISOString();
+    const snap = makeLightSnapshot(state, 200); snap.savedAt = new Date().toISOString();
     arr.unshift(snap); while(arr.length>4) arr.pop();
     localStorage.setItem(KEY_SAVED, JSON.stringify(arr));
     renderSaved(); alert("Guardado en historial.");
@@ -380,18 +372,10 @@ function renderSaved(){
   box.querySelectorAll("[data-load]").forEach(b=> b.onclick=()=>{
     const idx=+b.getAttribute("data-load"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
     const pick=arr2[idx]; if(!pick)return;
-    // Restaurar desde snapshot ligero
-    state.meta = pick.meta;
-    state.players = pick.players;
-    state.serveOrder = pick.serveOrder;
-    state.serveIndex = pick.serveIndex;
-    state.score = pick.score;
-    state.stats = pick.stats;
-    state.log = pick.log;
-    state.undoStack = [];
-    state.eventsSinceSave = 0;
-    render();
-    window.scrollTo({top:0,behavior:"smooth"});
+    state.meta = pick.meta; state.players = pick.players; state.serveOrder = pick.serveOrder;
+    state.serveIndex = pick.serveIndex; state.score = pick.score; state.stats = pick.stats; state.log = pick.log||[];
+    state.undoStack=[]; state.eventsSinceSave=0;
+    requestRender(); window.scrollTo({top:0,behavior:"smooth"});
   });
   box.querySelectorAll("[data-del]").forEach(b=> b.onclick=()=>{
     const idx=+b.getAttribute("data-del"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
@@ -405,7 +389,7 @@ function renderSaved(){
 
 /* ===== CSV ===== */
 function buildCSV(snap){
-  const s=snap||makeLightSnapshot(); const L=[];
+  const s=snap||state; const L=[];
   L.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
           `${s.players.A1.name} & ${s.players.A2.name}`,
           `${s.players.B1.name} & ${s.players.B2.name}`,
@@ -425,8 +409,13 @@ function downloadCSV(content, filename){
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-/* ===== Render ===== */
+/* ===== Render con requestAnimationFrame (anti-freeze) ===== */
+let renderScheduled=false;
+function requestRender(){ if (!renderScheduled){ renderScheduled=true; requestAnimationFrame(render); } }
+
 function render(){
+  renderScheduled=false;
+
   $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
   $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
 
@@ -441,9 +430,11 @@ function render(){
   if (isGoldenPoint()){ box.classList.add("gp"); note.innerHTML = '<span class="pill-warn">PUNTO DE ORO</span>: la próxima pelota define el juego.'; }
   else { box.classList.remove("gp"); note.textContent = "A 40–40 hay Punto de Oro."; }
 
-  const tbody=$("#tblLog"); const cut = state.log.slice(-150);
+  // Log visible (últimos 80 para fluidez)
+  const tbody=$("#tblLog"); const cut = state.log.slice(-80);
   tbody.innerHTML = cut.map(r=> `<tr><td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td></tr>`).join("");
 
+  // Stats
   const s=state.stats;
   $("#statsPlayers").innerHTML = `
     <div class="grid cols-2">
@@ -469,11 +460,11 @@ function startReset(){
   ["A1","A2","B1","B2"].forEach(id=> state.stats[id]={GG:0,SG:0,ENF:0,FE:0});
   state.log=[]; state.undoStack=[]; state.meta.started=true; state.meta.finished=false;
   state.meta.createdAt=new Date().toISOString(); state.meta.id="match_"+Date.now();
-  state.eventsSinceSave=0; updateServeOrderOptions(); render(); autosave();
+  state.eventsSinceSave=0; updateServeOrderOptions(); requestRender(); autosave();
 }
 
 ["#pA1","#pA2","#pB1","#pB2"].forEach(sel=>{
-  $(sel).addEventListener("input", ()=>{ syncNames(); updateServeOrderOptions(); render(); });
+  $(sel).addEventListener("input", ()=>{ syncNames(); updateServeOrderOptions(); requestRender(); });
 });
 
 $("#actionsGrid").addEventListener("click",(e)=>{
@@ -491,9 +482,9 @@ $("#btnEndSet").onclick=()=>{
   state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
   const targetSets=Math.ceil(state.meta.setFormat/2);
   if(state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
-  render(); autosave();
+  requestRender(); autosave();
 };
-$("#btnEndMatch").onclick=()=>{ if(!state.meta.started) return; pushUndo(); state.meta.finished=true; render(); autosave(); };
+$("#btnEndMatch").onclick=()=>{ if(!state.meta.started) return; pushUndo(); state.meta.finished=true; requestRender(); autosave(); };
 
 $("#btnExport").onclick=()=> downloadCSV(buildCSV(), "doblejotaenlared.csv");
 $("#btnSave").onclick=saveToHistory;
@@ -501,11 +492,10 @@ $("#btnSave").onclick=saveToHistory;
 /* boot */
 (function boot(){
   updateServeOrderOptions();
-  loadAutosave(); // si hay estado, lo trae en ligero
-  // refleja nombres en inputs
+  loadAutosave();
   $("#pA1").value=state.players.A1.name; $("#pA2").value=state.players.A2.name;
   $("#pB1").value=state.players.B1.name; $("#pB2").value=state.players.B2.name;
-  updateServeOrderOptions(); render();
+  updateServeOrderOptions(); requestRender();
 })();
 </script>
 </body>
