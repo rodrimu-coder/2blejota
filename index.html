@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>doblejotaenlared · Marcador Pádel (punto de oro)</title>
+<title>doblejotaenlared · Marcador Pádel Vrodrimu V12</title>
 <style>
   :root{
     --bg:#0b0f19; --panel:#101623; --line:#1f2a3d; --txt:#e5e7eb; --muted:#94a3b8;
@@ -366,24 +366,49 @@ function updateActionLabels(){
   });
 }
 
-/* ===== Snapshots (para undo robusto) ===== */
-function makeLightSnapshot(src=state, logLimit=300){
+function makeLightSnapshot(src = state, logLimit = 300){
+  // OJO: no incluimos undoStack en el snapshot a propósito
   return JSON.parse(JSON.stringify({
-    meta: src.meta, players: src.players, serveOrder: src.serveOrder, serveIndex: src.serveIndex,
-    mode: src.mode, tiebreak: src.tiebreak, score: src.score, stats: src.stats,
-    log: src.log.slice(-logLimit), setHistory: src.setHistory
+    meta: src.meta,
+    players: src.players,
+    serveOrder: src.serveOrder,
+    serveIndex: src.serveIndex,
+    mode: src.mode,
+    tiebreak: src.tiebreak,
+    score: src.score,
+    stats: src.stats,
+    log: src.log.slice(-logLimit),
+    setHistory: src.setHistory,
+    tiebreakEnabled: src.tiebreakEnabled ?? true
   }));
 }
-function pushUndo(){ state.undoStack.push(makeLightSnapshot()); if(state.undoStack.length>60) state.undoStack.shift(); }
+
+function pushUndo(){
+  // Asegura que exista el stack siempre
+  if (!Array.isArray(state.undoStack)) state.undoStack = [];
+  state.undoStack.push(makeLightSnapshot());
+  if (state.undoStack.length > 60) state.undoStack.shift();
+}
+
 function undo(){
-  if (!state.undoStack.length) return;
+  if (!state.undoStack || !state.undoStack.length) return;
   const prev = state.undoStack.pop();
-  Object.keys(state).forEach(k=>delete state[k]);
+
+  // Limpiamos y restauramos el snapshot
+  Object.keys(state).forEach(k => delete state[k]);
   Object.assign(state, prev);
-  // Limpieza y seguridad
-  ensureTiebreakMode();
+
+  // 🔧 FIX: como el snapshot no trae undoStack ni contadores, los re-inicializamos
+  state.undoStack = [];                 // <— línea clave que evita el cuelgue
   state.eventsSinceSave = 0;
-  try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot(state,300))); }catch(e){}
+
+  // Seguridad: si quedamos 6–6, forzar TB y limpiar puntos de game
+  ensureTiebreakMode();
+  if (state.mode === "tiebreak"){ state.score.ptsA = 0; state.score.ptsB = 0; }
+
+  // Persistimos el estado estable tras el undo
+  try { localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot(state,300))); } catch(e){}
+
   requestRender();
 }
 
