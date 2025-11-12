@@ -441,7 +441,8 @@ function checkSetEndRegular(){
 
 function recordPoint(playerId, type){
   if (!state.meta.started || state.meta.finished) return;
-
+ // NUEVO: garantiza que si quedó 6–6, YA estemos en TB
+  ensureTiebreakMode();
   pushUndo(); // snapshot ANTES de mutar
 
   let winnerTeam;
@@ -454,6 +455,10 @@ function recordPoint(playerId, type){
   }
 
   if (state.mode==="tiebreak"){
+    // NUEVO: aseguramos que nunca haya puntos de game visibles ni cierres de game
+  state.score.ptsA = 0;
+  state.score.ptsB = 0;
+    
     if (winnerTeam==="A") state.tiebreak.a++; else state.tiebreak.b++;
     const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
     state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr:`TB ${state.tiebreak.a}-${state.tiebreak.b} | Sets ${state.score.setsA}-${state.score.setsB}`, server: serverName() });
@@ -534,6 +539,9 @@ function render(){
 
   // Seguridad: si estamos en 6–6, que muestre TB
   ensureTiebreakMode();
+  // NUEVO: bloquear botón cerrar set durante TB
+  const btnEndSet = $("#btnEndSet");
+  if (btnEndSet) btnEndSet.disabled = (state.mode === "tiebreak");
 
   $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
   $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
