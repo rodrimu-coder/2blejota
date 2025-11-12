@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>doblejotaenlared · Marcador Pádel (punto de oro)</title>
+<style>
+  :root{
+    --bg:#0b0f19; --panel:#101623; --line:#1f2a3d; --txt:#e5e7eb; --muted:#94a3b8;
+    --okBg:#0e2a19; --okBorder:#14532d; --badBg:#2a1111; --badBorder:#7f1d1d;
+    --ring:#22d3ee; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+  .wrap{max-width:980px;margin:auto;padding:12px}
+  h1{margin:4px 0 10px;font-size:18px}
+  h2{margin:8px 0;font-size:15px;color:#cbd5e1}
+  .help{font-size:12px;color:var(--muted)}
+  .row{display:grid;gap:10px}
+  @media(min-width:860px){.row.cols-2{grid-template-columns:1fr 1fr}}
+  @media(min-width:980px){.row.cols-3{grid-template-columns:1fr .9fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--txt);outline:none}
+  input:focus,select:focus{border-color:var(--ring)}
+  .btn{cursor:pointer;border:1px solid var(--line);background:#0f172a;color:var(--txt);padding:10px;border-radius:10px;font-weight:600}
+  .btn:active{transform:translateY(1px)}
+  .btn.ok{background:var(--okBg);border-color:var(--okBorder)}
+  .btn.bad{background:var(--badBg);border-color:var(--badBorder)}
+  .btn.ghost{background:transparent}
+  .grid{display:grid;gap:8px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#cbd5e1;background:transparent}
+  .score{display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px dashed var(--line);padding:8px;border-radius:10px}
+  .big{font-size:24px;font-weight:800}
+  .kpi{display:flex;gap:8px;flex-wrap:wrap}
+  .kpi .box{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .kpi .n{font-size:18px;font-weight:800}
+  .log{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{position:sticky; top:0; background:#0f1522}
+  .gp{border:2px solid var(--warn)}
+  .pill-warn{background:#2a1f0e;border:1px solid #8a6a0a;color:#f8d36c;padding:2px 6px;border-radius:999px}
+  .sep{height:1px;background:var(--line);margin:8px 0}
+  /* Modal */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:50}
+  .modal{position:fixed; inset:0; display:none; z-index:51; align-items:center; justify-content:center; padding:12px}
+  .modal.show, .modal-backdrop.show{display:flex}
+  .modal .window{width:min(960px, 96vw); max-height:92vh; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .modal .header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
+  .modal .title{font-size:16px; font-weight:700}
+  .modal .body{display:grid; gap:12px}
+  @media(min-width:900px){ .modal .body.two-cols{ grid-template-columns:1fr 1fr } }
+  .modal .footer{display:flex; gap:8px; justify-content:flex-end; margin-top:8px}
+  .btn.close{background:#151a28}
+  .chartbox{height:320px; width:100%; position:relative}
+  .chartbox canvas{width:100% !important; height:100% !important; display:block}
+  .narrative-box{background:#0f1522;border:1px solid var(--line);border-radius:10px;padding:10px;white-space:pre-wrap;line-height:1.5}
+  /* Footer crédito */
+  .footer-credit{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:10px;color:#9fb6c7}
+  .footer-credit img{height:34px;display:block;filter:drop-shadow(0 0 8px rgba(0,0,0,.2))}
+  /* ENF/FE en rojo */
+  button[data-action="ENF"],
+  button[data-action="FE"]{
+    background-color:#7f1d1d !important;border-color:#b91c1c !important;color:#f8fafc !important;font-weight:600;
+  }
+  button[data-action="ENF"]:active,
+  button[data-action="FE"]:active{background-color:#991b1b !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎾 doblejotaenlared — Marcador de Pádel (punto de oro)</h1>
+
+  <div class="card">
+    <h2>1) Configuración</h2>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="grid">
+          <div class="grid cols-2">
+            <div><div class="help">A1</div><input id="pA1" value="A1" /></div>
+            <div><div class="help">A2</div><input id="pA2" value="A2" /></div>
+          </div>
+          <div class="grid cols-2">
+            <div><div class="help">B1</div><input id="pB1" value="B1" /></div>
+            <div><div class="help">B2</div><input id="pB2" value="B2" /></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid">
+          <div>
+            <div class="help">Orden de servicio (quién saca primero y rotación)</div>
+            <select id="serveOrder"></select>
+            <div class="help">Rotación: Servidor → siguiente de la lista.</div>
+          </div>
+          <div>
+            <div class="help">Formato de sets</div>
+            <select id="setFormat">
+              <option value="1">1 set (6 juegos, +2, sin tiebreak)</option>
+              <option value="3" selected>Mejor de 3</option>
+              <option value="5">Mejor de 5</option>
+            </select>
+          </div>
+          <div>
+            <label class="help" style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <input type="checkbox" id="chkTiebreak" checked />
+              Activar tiebreak (7 puntos y 2 de diferencia al llegar 6–6)
+            </label>
+          </div>
+          <div class="grid cols-2">
+            <button id="btnStart" class="btn ok">Iniciar/Resetear</button>
+            <button id="btnUndo" class="btn">Deshacer punto</button>
+          </div>
+          <div class="grid cols-2">
+            <button id="btnEndSet" class="btn">Cerrar set</button>
+            <button id="btnEndMatch" class="btn bad">Terminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Resumen de sets -->
+    <h2>2) Resumen de sets</h2>
+    <div id="setsHistoryBox" class="card help">Sin sets aún.</div>
+
+    <h2 style="margin-top:8px">3) Tablero</h2>
+    <div class="row cols-3">
+      <div class="card">
+        <div id="teamATitle" class="help">Equipo A</div>
+        <div class="kpi">
+          <div class="box"><div class="help">Sets</div><div id="setsA" class="n">0</div></div>
+          <div class="box"><div class="help">Juegos (set)</div><div id="gamesA" class="n">0</div></div>
+          <div class="box"><div class="help">Puntos (juego / TB)</div><div id="pointsA" class="n">0</div></div>
+        </div>
+      </div>
+      <div id="scoreBox" class="card">
+        <div class="score">
+          <div><div class="help">Servidor</div><div class="badge" id="serverNow">-</div></div>
+          <div class="big" id="tennisScore">0 — 0</div>
+          <div><div class="help">Estado</div><div class="badge" id="stateNow">Listo</div></div>
+        </div>
+        <div id="gpNote" class="help" style="margin-top:6px">A 40–40 hay <b>Punto de Oro</b>.</div>
+      </div>
+      <div class="card">
+        <div id="teamBTitle" class="help">Equipo B</div>
+        <div class="kpi">
+          <div class="box"><div class="help">Sets</div><div id="setsB" class="n">0</div></div>
+          <div class="box"><div class="help">Juegos (set)</div><div id="gamesB" class="n">0</div></div>
+          <div class="box"><div class="help">Puntos (juego / TB)</div><div id="pointsB" class="n">0</div></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:8px">4) Registrar punto</h2>
+    <div class="row cols-2" id="actionsGrid">
+      <div class="card">
+        <div class="help">Equipo A — Acciones</div>
+        <div class="grid cols-2">
+          <button class="btn ok" data-player="A1" data-action="GG">A1 · GG</button>
+          <button class="btn ok" data-player="A1" data-action="SG">A1 · SG</button>
+          <button class="btn"    data-player="A1" data-action="ENF">A1 · ENF</button>
+          <button class="btn"    data-player="A1" data-action="FE">A1 · FE</button>
+
+          <button class="btn ok" data-player="A2" data-action="GG">A2 · GG</button>
+          <button class="btn ok" data-player="A2" data-action="SG">A2 · SG</button>
+          <button class="btn"    data-player="A2" data-action="ENF">A2 · ENF</button>
+          <button class="btn"    data-player="A2" data-action="FE">A2 · FE</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="help">Equipo B — Acciones</div>
+        <div class="grid cols-2">
+          <button class="btn ok" data-player="B1" data-action="GG">B1 · GG</button>
+          <button class="btn ok" data-player="B1" data-action="SG">B1 · SG</button>
+          <button class="btn"    data-player="B1" data-action="ENF">B1 · ENF</button>
+          <button class="btn"    data-player="B1" data-action="FE">B1 · FE</button>
+
+          <button class="btn ok" data-player="B2" data-action="GG">B2 · GG</button>
+          <button class="btn ok" data-player="B2" data-action="SG">B2 · SG</button>
+          <button class="btn"    data-player="B2" data-action="ENF">B2 · ENF</button>
+          <button class="btn"    data-player="B2" data-action="FE">B2 · FE</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row cols-2" style="margin-top:8px">
+      <div class="card">
+        <div class="help">Estadísticas por jugador(a)</div>
+        <div id="statsPlayers" class="help">Sin datos.</div>
+
+        <div class="grid cols-2" style="margin-top:8px">
+          <button id="btnToggleAdv" class="btn">📋 Mostrar tabla avanzada</button>
+          <button id="btnCharts" class="btn">📊 Ver estadísticas gráficas</button>
+        </div>
+        <!-- Tabla avanzada -->
+        <div id="advTableWrap" class="log" style="display:none; margin-top:8px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Jugador</th><th>Pareja</th><th>GG</th><th>SG</th><th>ENF</th><th>FE</th>
+                <th>Acciones</th><th>% Acierto</th><th>Ptos a favor</th><th>Errores propios</th>
+                <th>Diferencial</th><th>Games ganados pareja</th><th>Games totales</th>
+                <th>% Games ganados</th><th>Particip acción</th><th>Set</th><th>Tipo Análisis</th>
+              </tr>
+            </thead>
+            <tbody id="advTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="help">Historial del partido</div>
+        <div class="log">
+          <table>
+            <thead><tr><th>#</th><th>Evento</th><th>Tipo</th><th>Equipo</th><th>Marcador</th><th>Servidor</th></tr></thead>
+            <tbody id="tblLog"></tbody>
+          </table>
+        </div>
+        <div class="grid cols-2" style="margin-top:8px">
+          <button id="btnExport" class="btn">Exportar CSV</button>
+          <button id="btnSave" class="btn">Guardar (máx. 4)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón de narrativa: visible al terminar el partido -->
+    <div style="margin-top:8px">
+      <button id="btnNarrative" class="btn" style="display:none">🎙️ Ver resumen narrativo</button>
+    </div>
+
+    <h2 style="margin-top:8px">5) Últimos 4 partidos guardados</h2>
+    <div class="card"><div id="savedList" class="help">No hay partidos.</div></div>
+
+    <div class="footer-credit">
+      <img id="viatechLogo" src="viatech-logo.png" alt="VIA TECH" onerror="this.style.display='none'">
+      <span>Sistema creado por <strong>VIA TECH</strong></span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de gráficos -->
+<div class="modal-backdrop" id="modalBackdrop"></div>
+<div class="modal" id="modalCharts">
+  <div class="window">
+    <div class="header">
+      <div class="title">📈 Estadísticas del partido</div>
+      <button id="btnCloseModal" class="btn close">Cerrar</button>
+    </div>
+    <div class="body two-cols">
+      <div class="card">
+        <div class="help">Barras por jugadora (GG, SG, ENF, FE)</div>
+        <div class="chartbox"><canvas id="chartBars"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="help">Pastel comparativo por equipo (Ganadores vs Errores)</div>
+        <div class="chartbox"><canvas id="chartPie"></canvas></div>
+      </div>
+    </div>
+    <div class="footer">
+      <button id="btnSaveBars" class="btn">⬇️ PNG Barras</button>
+      <button id="btnSavePie"  class="btn">⬇️ PNG Pastel</button>
+      <button id="btnCloseModal2" class="btn close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de narrativa -->
+<div class="modal-backdrop" id="modalBackdropNarr"></div>
+<div class="modal" id="modalNarrative">
+  <div class="window">
+    <div class="header">
+      <div class="title">🎙️ Resumen narrativo del partido</div>
+      <button id="btnCloseNarr" class="btn close">Cerrar</button>
+    </div>
+    <div class="body">
+      <div class="narrative-box" id="narrativeText">Sin datos.</div>
+    </div>
+    <div class="footer">
+      <button id="btnCopyNarr" class="btn">📋 Copiar resumen</button>
+      <button id="btnCloseNarr2" class="btn close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====== Utilidades ====== */
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+/* ====== Estado ====== */
+const state = {
+  meta:{ started:false, finished:false, setFormat:3, createdAt:null, id:null },
+  players:{ A1:{name:"A1"}, A2:{name:"A2"}, B1:{name:"B1"}, B2:{name:"B2"} },
+  serveOrder:["A1","B1","A2","B2"],
+  serveIndex:0,
+  mode:"game",               // "game" | "tiebreak"
+  tiebreak:{a:0,b:0},        // puntos TB
+  tiebreakEnabled:true,
+  score:{ setsA:0, setsB:0, gamesA:0, gamesB:0, ptsA:0, ptsB:0 },
+  stats:{ A1:{GG:0,SG:0,ENF:0,FE:0}, A2:{GG:0,SG:0,ENF:0,FE:0}, B1:{GG:0,SG:0,ENF:0,FE:0}, B2:{GG:0,SG:0,ENF:0,FE:0} },
+  log:[],
+  setHistory:[],              // [{a:6,b:2}, ...] o {a:7,b:6} si TB
+  undoStack:[],
+  eventsSinceSave:0
+};
+const KEY_AUTOSAVE="DJR_autosave_fast_tiebreak_v1";
+const KEY_SAVED  ="DJR_saved_fast_tiebreak_v1";
+
+/* ====== Helpers ====== */
+const teamOf = id => id[0]==="A" ? "A" : "B";
+const serverId = () => state.serveOrder[state.serveIndex] || "A1";
+const serverName = () => state.players[serverId()]?.name || serverId();
+const nextServer = () => state.serveIndex = (state.serveIndex + 1) % state.serveOrder.length;
+const resetGamePoints = () => { state.score.ptsA = 0; state.score.ptsB = 0; };
+
+/* Fuerza tiebreak cuando corresponda (6–6) */
+function ensureTiebreakMode(){
+  if (!state.tiebreakEnabled) return;
+  if (state.mode !== "tiebreak" && state.score.gamesA === 6 && state.score.gamesB === 6){
+    state.mode = "tiebreak";
+    state.tiebreak = { a:0, b:0 };
+    resetGamePoints();
+  }
+}
+
+function tennisStr(a,b){
+  if (state.mode==="tiebreak") return `TB ${state.tiebreak.a} — ${state.tiebreak.b}`;
+  const map = ["0","15","30","40"];
+  if (a>=3 && b>=3 && a===b) return "GP";
+  const sa = (a>=3)?"40":(map[a]||"40");
+  const sb = (b>=3)?"40":(map[b]||"40");
+  return `${sa} — ${sb}`;
+}
+const isGoldenPoint = () => state.mode==="game" && (state.score.ptsA>=3 && state.score.ptsB>=3 && state.score.ptsA===state.score.ptsB);
+
+/* ===== Nombres / UI ===== */
+function syncNames(){
+  state.players.A1.name = $("#pA1").value.trim() || "A1";
+  state.players.A2.name = $("#pA2").value.trim() || "A2";
+  state.players.B1.name = $("#pB1").value.trim() || "B1";
+  state.players.B2.name = $("#pB2").value.trim() || "B2";
+}
+function updateServeOrderOptions(){
+  const n = state.players;
+  const opts = [
+    ["A1,B1,A2,B2", `A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name}) → B2 (${n.B2.name})`],
+    ["A1,B2,A2,B1", `A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name}) → B1 (${n.B1.name})`],
+    ["B1,A1,B2,A2", `B1 (${n.B1.name}) → A1 (${n.A1.name}) → B2 (${n.B2.name}) → A2 (${n.A2.name})`],
+    ["B2,A1,B1,A2", `B2 (${n.B2.name}) → A1 (${n.A1.name}) → B1 (${n.B1.name}) → A2 (${n.A2.name})`],
+  ];
+  const sel = $("#serveOrder");
+  sel.innerHTML = opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  const current = state.serveOrder.join(",");
+  if ([...sel.options].some(o=>o.value===current)) sel.value = current;
+}
+function updateActionLabels(){
+  const nameOf = id => state.players[id]?.name || id;
+  ["A1","A2","B1","B2"].forEach(id=>{
+    ["GG","SG","ENF","FE"].forEach(act=>{
+      const btn = document.querySelector(`button[data-player="${id}"][data-action="${act}"]`);
+      if (btn) btn.textContent = `${nameOf(id)} · ${act}`;
+    });
+  });
+}
+
+/* ===== Snapshots (para undo robusto) ===== */
+function makeLightSnapshot(src=state, logLimit=300){
+  return JSON.parse(JSON.stringify({
+    meta: src.meta, players: src.players, serveOrder: src.serveOrder, serveIndex: src.serveIndex,
+    mode: src.mode, tiebreak: src.tiebreak, score: src.score, stats: src.stats,
+    log: src.log.slice(-logLimit), setHistory: src.setHistory
+  }));
+}
+function pushUndo(){ state.undoStack.push(makeLightSnapshot()); if(state.undoStack.length>60) state.undoStack.shift(); }
+function undo(){
+  if (!state.undoStack.length) return;
+  const prev = state.undoStack.pop();
+  Object.keys(state).forEach(k=>delete state[k]);
+  Object.assign(state, prev);
+  // Limpieza y seguridad
+  ensureTiebreakMode();
+  state.eventsSinceSave = 0;
+  try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot(state,300))); }catch(e){}
+  requestRender();
+}
+
+/* ===== Lógica de juego ===== */
+function closeGameIfNeeded(){
+  if (state.mode==="tiebreak") return false;
+
+  const a = state.score.ptsA, b = state.score.ptsB;
+  if (a>=3 && b>=3 && a===b) return false; // punto de oro
+
+  let winner=null;
+  if (a>=4 || b>=4) winner = (a>b) ? "A" : "B";
+  else if (a>=3 && b>=3 && a!==b) winner = (a>b) ? "A" : "B";
+
+  if (winner){
+    if (winner==="A") state.score.gamesA++; else state.score.gamesB++;
+    resetGamePoints(); nextServer();
+    ensureTiebreakMode(); // forzar 6–6 -> TB
+    return true;
+  }
+  return false;
+}
+
+function maybeCloseTiebreak(){
+  if (state.mode!=="tiebreak") return false;
+  const a=state.tiebreak.a, b=state.tiebreak.b;
+  if ((a>=7 || b>=7) && Math.abs(a-b)>=2){
+    const winner = (a>b) ? "A" : "B";
+    const sh = {a: (winner==="A"?7:6), b: (winner==="A"?6:7)};
+    state.setHistory.push(sh);
+    if (winner==="A") state.score.setsA++; else state.score.setsB++;
+    // Reset para siguiente set
+    state.score.gamesA = 0; state.score.gamesB = 0;
+    resetGamePoints();
+    state.mode="game";
+    state.tiebreak={a:0,b:0};
+    const targetSets = Math.ceil(state.meta.setFormat/2);
+    if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
+    return true;
+  }
+  return false;
+}
+
+function checkSetEndRegular(){
+  if (state.mode==="tiebreak") return;
+  const gA=state.score.gamesA, gB=state.score.gamesB, need=6;
+  if ((gA>=need || gB>=need) && Math.abs(gA-gB)>=2){
+    state.setHistory.push({a:gA,b:gB});
+    if (gA>gB) state.score.setsA++; else state.score.setsB++;
+    state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
+    const targetSets = Math.ceil(state.meta.setFormat/2);
+    if (state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
+  }
+}
+
+function recordPoint(playerId, type){
+  if (!state.meta.started || state.meta.finished) return;
+
+  pushUndo(); // snapshot ANTES de mutar
+
+  let winnerTeam;
+  if (type==="GG" || type==="SG"){
+    winnerTeam = teamOf(playerId);
+    state.stats[playerId][type] += 1;
+  } else {
+    state.stats[playerId][type] += 1;
+    winnerTeam = teamOf(playerId)==="A" ? "B" : "A";
+  }
+
+  if (state.mode==="tiebreak"){
+    if (winnerTeam==="A") state.tiebreak.a++; else state.tiebreak.b++;
+    const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
+    state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr:`TB ${state.tiebreak.a}-${state.tiebreak.b} | Sets ${state.score.setsA}-${state.score.setsB}`, server: serverName() });
+    maybeCloseTiebreak(); // puede cerrar set
+  } else {
+    if (winnerTeam==="A") state.score.ptsA++; else state.score.ptsB++;
+
+    const pointStr = tennisStr(state.score.ptsA, state.score.ptsB);
+    const eventGameStr = `${pointStr} | Juegos ${state.score.gamesA}-${state.score.gamesB}`;
+
+    const closed = closeGameIfNeeded();
+    if (closed) checkSetEndRegular();
+
+    const evento = (type==="ENF"||type==="FE") ? `Error ${state.players[playerId].name}` : state.players[playerId].name;
+    state.log.push({ n: state.log.length+1, evento, type, winnerTeam, gameStr: eventGameStr, server: serverName() });
+  }
+
+  if (state.log.length>10000) state.log.splice(0, state.log.length-10000);
+  state.eventsSinceSave++;
+
+  // Seguridad extra: si se llegó a 6–6 en esta jugada, cambia a TB
+  ensureTiebreakMode();
+
+  requestRender();
+  if (state.eventsSinceSave>=5){ autosave(); state.eventsSinceSave=0; }
+}
+
+/* ===== Persistencia ===== */
+function autosave(){ try{ localStorage.setItem(KEY_AUTOSAVE, JSON.stringify(makeLightSnapshot(state,300))); }catch(e){} }
+function loadAutosave(){
+  try{
+    const raw=localStorage.getItem(KEY_AUTOSAVE); if(!raw) return false;
+    const s=JSON.parse(raw); Object.keys(state).forEach(k=>delete state[k]); Object.assign(state,s);
+    state.undoStack=[]; state.eventsSinceSave=0; return true;
+  }catch(e){ return false; }
+}
+function saveToHistory(){
+  try{
+    const arr = JSON.parse(localStorage.getItem(KEY_SAVED) || "[]");
+    const snap = makeLightSnapshot(state,300); snap.savedAt = new Date().toISOString();
+    arr.unshift(snap); while(arr.length>4) arr.pop();
+    localStorage.setItem(KEY_SAVED, JSON.stringify(arr));
+    renderSaved(); alert("Guardado en historial.");
+  }catch(e){ alert("No se pudo guardar."); }
+}
+
+/* ===== CSV ===== */
+function buildCSV(snap){
+  const s=snap||state; const L=[];
+  L.push(["doblejotaenlared", new Date(s.meta.createdAt||Date.now()).toISOString(),
+          `${s.players.A1.name} & ${s.players.A2.name}`,
+          `${s.players.B1.name} & ${s.players.B2.name}`,
+          `Sets ${s.score.setsA}-${s.score.setsB}`].join(","));
+  if (s.setHistory?.length){
+    L.push(""); L.push("Historial de sets"); L.push("Set,A,B");
+    s.setHistory.forEach((sh,i)=>L.push(`${i+1},${sh.a},${sh.b}`));
+  }
+  L.push(""); L.push("Estadísticas por jugadora"); L.push("Jugadora,Equipo,GG,SG,ENF,FE");
+  ["A1","A2","B1","B2"].forEach(id=>{
+    const r=s.stats[id]||{GG:0,SG:0,ENF:0,FE:0}; L.push([s.players[id].name, teamOf(id), r.GG, r.SG, r.ENF, r.FE].join(","));
+  });
+  L.push(""); L.push("Historial de puntos"); L.push("N,Evento,Tipo,Equipo,Marcador,Servidor");
+  (s.log||[]).forEach(r=> L.push([r.n, `"${r.evento}"`, r.type, r.winnerTeam, `"${r.gameStr}"`, `"${r.server}"`].join(",")));
+  L.push(""); L.push("Resumen final"); L.push(`Sets A,${s.score.setsA},Sets B,${s.score.setsB}`);
+  return L.join("\r\n");
+}
+function downloadCSV(content, filename){
+  const blob=new Blob([content],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download=filename||"doblejotaenlared.csv"; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ===== Render (con RAF) ===== */
+let renderScheduled=false;
+function requestRender(){ if (!renderScheduled){ renderScheduled=true; requestAnimationFrame(render); } }
+function render(){
+  renderScheduled=false;
+
+  // Seguridad: si estamos en 6–6, que muestre TB
+  ensureTiebreakMode();
+
+  $("#teamATitle").textContent = `Equipo A: ${state.players.A1.name} & ${state.players.A2.name}`;
+  $("#teamBTitle").textContent = `Equipo B: ${state.players.B1.name} & ${state.players.B2.name}`;
+
+  $("#setsA").textContent=state.score.setsA; $("#setsB").textContent=state.score.setsB;
+  $("#gamesA").textContent=state.score.gamesA; $("#gamesB").textContent=state.score.gamesB;
+
+  // Puntos o TB
+  if (state.mode==="tiebreak"){
+    $("#pointsA").textContent=state.tiebreak.a; $("#pointsB").textContent=state.tiebreak.b;
+    $("#tennisScore").textContent=tennisStr(); // TB x–y
+    $("#stateNow").textContent="Tiebreak en curso";
+    $("#gpNote").innerHTML = 'Tiebreak a 7 con 2 de diferencia.';
+  }else{
+    $("#pointsA").textContent=state.score.ptsA; $("#pointsB").textContent=state.score.ptsB;
+    $("#tennisScore").textContent=tennisStr(state.score.ptsA,state.score.ptsB);
+    $("#stateNow").textContent = state.meta.finished ? "Finalizado" : (state.meta.started ? "Juego en curso" : "Listo");
+    const box=$("#scoreBox"), note=$("#gpNote");
+    if (isGoldenPoint()){ box.classList.add("gp"); note.innerHTML = '<span class="pill-warn">PUNTO DE ORO</span>: la próxima pelota define el juego.'; }
+    else { box.classList.remove("gp"); note.textContent = "A 40–40 hay Punto de Oro."; }
+  }
+  $("#serverNow").textContent=serverName();
+
+  // Resumen de sets
+  const sh = state.setHistory;
+  const curr = state.meta.finished ? `<div class="badge">Partido finalizado</div>`
+              : (state.mode==="tiebreak" ? `<div class="badge">Set ${sh.length+1}: tiebreak (${state.tiebreak.a}–${state.tiebreak.b})</div>`
+                 : `<div class="badge">Set ${sh.length+1}: jugando (${state.score.gamesA}–${state.score.gamesB})</div>`);
+  const items = sh.map((s,i)=>`<div class="badge">Set ${i+1}: ${s.a}–${s.b}</div>`).join(" ");
+  $("#setsHistoryBox").innerHTML = (sh.length? items+" " : "") + curr;
+
+  // Log compacto
+  const tbody=$("#tblLog"); const cut = state.log.slice(-120);
+  tbody.innerHTML = cut.map(r=> `<tr><td>${r.n}</td><td>${r.evento}</td><td>${r.type}</td><td>${r.winnerTeam}</td><td>${r.gameStr}</td><td>${r.server}</td></tr>`).join("");
+
+  // KPIs cortos
+  const s=state.stats;
+  $("#statsPlayers").innerHTML = `
+    <div class="grid cols-2">
+      ${["A1","A2","B1","B2"].map(id=>{
+        const nm=state.players[id].name, t=teamOf(id), r=s[id];
+        return `<div class="kpi"><div class="box"><div class="help">${nm} (${t})</div>
+          <div class="help">GG ${r.GG} · SG ${r.SG} · ENF ${r.ENF} · FE ${r.FE}</div></div></div>`;
+      }).join("")}
+    </div>`;
+
+  renderAdvancedTable();
+  renderSaved();
+  updateServeOrderOptions();
+  updateActionLabels();
+  maybeShowNarrativeButton();
+}
+
+/* ===== Mostrar/Ocultar botón de narrativa ===== */
+function maybeShowNarrativeButton(){
+  const btn = $("#btnNarrative");
+  btn.style.display = state.meta.finished ? "inline-block" : "none";
+}
+
+/* ===== Tabla Avanzada ===== */
+function renderAdvancedTable(){
+  const wrap = $("#advTableWrap");
+  if (wrap.style.display === "none") return;
+
+  const totals = ["A1","A2","B1","B2"].reduce((acc,id)=>{
+    const r=state.stats[id]; acc.actions += (r.GG+r.SG+r.ENF+r.FE); return acc;
+  }, {actions:0});
+  const gamesTotal = state.setHistory.reduce((n,s)=>n+s.a+s.b,0) + (state.score.gamesA+state.score.gamesB);
+  const gamesA = state.setHistory.reduce((n,s)=>n+s.a,0) + state.score.gamesA;
+  const gamesB = state.setHistory.reduce((n,s)=>n+s.b,0) + state.score.gamesB;
+
+  const rows = ["A1","A2","B1","B2"].map(id=>{
+    const nm=state.players[id].name;
+    const team=teamOf(id);
+    const r=state.stats[id];
+    const acciones = r.GG+r.SG+r.ENF+r.FE;
+    const acierto = acciones? Math.round(((r.GG+r.SG)/acciones)*100) : 0;
+    const favor   = r.GG+r.SG;
+    const errores = r.ENF+r.FE;
+    const dif     = favor-errores;
+    const gamesGanadosPareja = (team==="A")? gamesA : gamesB;
+    const pctGames = gamesTotal? Math.round((gamesGanadosPareja/gamesTotal)*100) : 0;
+    const particip = totals.actions? ((acciones/totals.actions)*100).toFixed(1)+"%" : "0%";
+    return `
+      <tr>
+        <td>${nm}</td><td>${team}</td>
+        <td>${r.GG}</td><td>${r.SG}</td><td>${r.ENF}</td><td>${r.FE}</td>
+        <td>${acciones}</td><td>${acierto}%</td>
+        <td>${favor}</td><td>${errores}</td><td>${dif}</td>
+        <td>${gamesGanadosPareja}</td><td>${gamesTotal}</td><td>${pctGames}%</td>
+        <td>${particip}</td><td>Partido</td><td>Partido</td>
+      </tr>`;
+  }).join("");
+  $("#advTableBody").innerHTML = rows || `<tr><td colspan="17">Sin datos</td></tr>`;
+}
+
+/* ===== Guardados ===== */
+function renderSaved(){
+  const box=$("#savedList"); const arr=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+  if(!arr.length){ box.textContent="No hay partidos."; return; }
+  box.innerHTML = arr.map((m,i)=>{
+    const t=new Date(m.savedAt||m.meta?.createdAt||Date.now()).toLocaleString();
+    const A=`${m.players.A1.name} & ${m.players.A2.name}`, B=`${m.players.B1.name} & ${m.players.B2.name}`;
+    const res=`${m.score.setsA}-${m.score.setsB} sets`;
+    const sets = (m.setHistory||[]).map((s,j)=>`Set ${j+1}: ${s.a}-${s.b}`).join(" · ");
+    return `<div class="score">
+      <div><div class="help">#${i+1} · ${t}</div><div>${A} <span class="help">vs</span> ${B}</div><div class="help">${res}${sets? " · "+sets:""}</div></div>
+      <div class="grid" style="grid-template-columns:auto auto auto;gap:6px">
+        <button class="btn ghost" data-load="${i}">Cargar</button>
+        <button class="btn bad" data-del="${i}">Borrar</button>
+        <button class="btn" data-export="${i}">CSV</button>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-load]").forEach(b=> b.onclick=()=>{
+    const idx=+b.getAttribute("data-load"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+    const pick=arr2[idx]; if(!pick)return;
+    Object.keys(state).forEach(k=>delete state[k]); Object.assign(state,pick);
+    state.undoStack=[]; state.eventsSinceSave=0;
+    requestRender(); window.scrollTo({top:0,behavior:"smooth"});
+  });
+  box.querySelectorAll("[data-del]").forEach(b=> b.onclick=()=>{
+    const idx=+b.getAttribute("data-del"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+    arr2.splice(idx,1); localStorage.setItem(KEY_SAVED, JSON.stringify(arr2)); renderSaved();
+  });
+  box.querySelectorAll("[data-export]").forEach(b=> b.onclick=()=>{
+    const idx=+b.getAttribute("data-export"); const arr2=JSON.parse(localStorage.getItem(KEY_SAVED)||"[]");
+    if(arr2[idx]) downloadCSV(buildCSV(arr2[idx]), `doblejotaenlared_guardado_${idx+1}.csv`);
+  });
+}
+
+/* ===== Gráficos (Chart.js) ===== */
+let ChartLib=null, chartBars=null, chartPie=null;
+function loadChartJS(){
+  return new Promise((resolve,reject)=>{
+    if (ChartLib) return resolve(ChartLib);
+    const s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+    s.onload=()=>{ ChartLib=window.Chart; resolve(ChartLib); };
+    s.onerror=()=>reject(new Error("No se pudo cargar Chart.js"));
+    document.head.appendChild(s);
+  });
+}
+function downloadChartPNG(chart, filename){
+  if(!chart) return;
+  const url = chart.toBase64Image("image/png", 1);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename || "chart.png";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function openChartsModal(){
+  loadChartJS().then(()=>{
+    // Reset limpio de canvas (evita alargamiento)
+    const barsOld = document.getElementById("chartBars");
+    const pieOld  = document.getElementById("chartPie");
+    const barsNew = barsOld.cloneNode(false);
+    const pieNew  = pieOld.cloneNode(false);
+    barsOld.parentNode.replaceChild(barsNew, barsOld);
+    pieOld.parentNode.replaceChild(pieNew,  pieOld);
+
+    const labelsPlayers = ["A1","A2","B1","B2"].map(id => state.players[id].name || id);
+    const GG  = ["A1","A2","B1","B2"].map(id => state.stats[id].GG);
+    const SG  = ["A1","A2","B1","B2"].map(id => state.stats[id].SG);
+    const ENF = ["A1","A2","B1","B2"].map(id => state.stats[id].ENF);
+    const FE  = ["A1","A2","B1","B2"].map(id => state.stats[id].FE);
+
+    const winA = (state.stats.A1.GG+state.stats.A1.SG) + (state.stats.A2.GG+state.stats.A2.SG);
+    const errA = (state.stats.A1.ENF+state.stats.A1.FE) + (state.stats.A2.ENF+state.stats.A2.FE);
+    const winB = (state.stats.B1.GG+state.stats.B1.SG) + (state.stats.B2.GG+state.stats.B2.SG);
+    const errB = (state.stats.B1.ENF+state.stats.B1.FE) + (state.stats.B2.ENF+state.stats.B2.FE);
+
+    if (chartBars){ chartBars.destroy(); chartBars=null; }
+    if (chartPie){  chartPie.destroy();  chartPie=null;  }
+
+    chartBars = new ChartLib(barsNew.getContext("2d"), {
+      type:'bar',
+      data:{ labels:labelsPlayers,
+             datasets:[ {label:'GG',data:GG}, {label:'SG',data:SG},
+                        {label:'ENF',data:ENF}, {label:'FE',data:FE} ] },
+      options:{
+        responsive:true, maintainAspectRatio:false, animation:false,
+        plugins:{ legend:{ labels:{ color:'#cbd5e1' } } },
+        scales:{
+          x:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2a3d' } },
+          y:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2a3d' }, beginAtZero:true, precision:0 }
+        }
+      }
+    });
+
+    chartPie = new ChartLib(pieNew.getContext("2d"), {
+      type:'pie',
+      data:{ labels:[`A · Ganadores (${winA})`,`A · Errores (${errA})`,`B · Ganadores (${winB})`,`B · Errores (${errB})`],
+             datasets:[{ data:[winA,errA,winB,errB] }] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:false,
+                plugins:{ legend:{ labels:{ color:'#cbd5e1' } } } }
+    });
+
+    $("#modalBackdrop").classList.add("show");
+    $("#modalCharts").classList.add("show");
+
+    $("#btnSaveBars").onclick = ()=> downloadChartPNG(chartBars, "doblejotaenlared_barras.png");
+    $("#btnSavePie").onclick  = ()=> downloadChartPNG(chartPie,  "doblejotaenlared_pastel.png");
+  }).catch(e=> alert("No pude cargar los gráficos: "+e.message));
+}
+function closeChartsModal(){
+  if (chartBars){ chartBars.destroy(); chartBars=null; }
+  if (chartPie){  chartPie.destroy();  chartPie=null;  }
+  $("#modalBackdrop").classList.remove("show");
+  $("#modalCharts").classList.remove("show");
+}
+
+/* ===== Narrativa ===== */
+function generateMatchNarrative(){
+  const setsTxt = state.setHistory.map((s,i)=>`Set ${i+1}: ${s.a}-${s.b}`).join(", ");
+  const totalSetsA = state.score.setsA;
+  const totalSetsB = state.score.setsB;
+
+  const gamesA = state.setHistory.reduce((n,s)=>n+s.a,0) + state.score.gamesA;
+  const gamesB = state.setHistory.reduce((n,s)=>n+s.b,0) + state.score.gamesB;
+  const gamesDiff = Math.abs(gamesA - gamesB);
+
+  const sumTeam = (ids) => {
+    const t = { GG:0, SG:0, ENF:0, FE:0 };
+    ids.forEach(id=>{
+      t.GG += state.stats[id].GG;
+      t.SG += state.stats[id].SG;
+      t.ENF += state.stats[id].ENF;
+      t.FE += state.stats[id].FE;
+    });
+    t.win = t.GG + t.SG; t.err = t.ENF + t.FE;
+    t.actions = t.win + t.err;
+    t.acc = t.actions? Math.round((t.win / t.actions)*100) : 0;
+    return t;
+  };
+  const A = sumTeam(["A1","A2"]);
+  const B = sumTeam(["B1","B2"]);
+
+  function playerScore(id){
+    const r=state.stats[id]; const win=r.GG+r.SG, err=r.ENF+r.FE;
+    const actions=win+err; const acc=actions? Math.round((win/actions)*100):0;
+    return { id, name:state.players[id].name, win, err, actions, acc, diff: (win-err) };
+  }
+  const ranking = ["A1","A2","B1","B2"].map(playerScore)
+    .sort((x,y)=> (y.diff - x.diff) || (y.win - x.win) );
+
+  const mvp = ranking[0];
+  const worst = ranking[ranking.length-1];
+
+  let tono;
+  if (totalSetsA===totalSetsB) tono="partido igualado";
+  else if (gamesDiff<=2) tono="partido muy parejo, definido por detalles";
+  else if (gamesDiff<=4) tono="partido competitivo, con tramos de dominio alternado";
+  else tono="victoria clara en el global";
+
+  const teamWinner = (totalSetsA>totalSetsB) ? "A" : "B";
+  const pairA = `${state.players.A1.name} & ${state.players.A2.name}`;
+  const pairB = `${state.players.B1.name} & ${state.players.B2.name}`;
+  const ganadorTxt = teamWinner==="A" ? pairA : pairB;
+  const perdedorTxt = teamWinner==="A" ? pairB : pairA;
+  const marcadorSetsTxt = state.setHistory.length ? ` (${setsTxt})` : "";
+
+  const saquesDom = (A.SG>B.SG) ? "El equipo A marcó diferencia con el saque" : (A.SG<B.SG ? "El equipo B impuso condiciones desde el servicio" : "Los saques no marcaron grandes diferencias");
+  const erroresClave = (A.err<B.err) ? "A cometió menos errores en momentos clave"
+                     : (A.err>B.err) ? "B redujo mejor los errores cuando el marcador apretaba"
+                     : "Ambas duplas se equivocaron en proporciones similares";
+  const ganadoresClave = (A.win>B.win) ? "A fue más profundo con sus golpes ganadores"
+                     : (A.win<B.win) ? "B encontró mejores ángulos y definiciones"
+                     : "Los ganadores estuvieron equilibrados";
+
+  const lines = [];
+  lines.push(`Partido finalizado: ${ganadorTxt} derrota a ${perdedorTxt} por ${totalSetsA}-${totalSetsB}${marcadorSetsTxt}.`);
+  lines.push(`Fue un ${tono}.`);
+  lines.push("");
+  lines.push(`🔎 Claves del encuentro:`);
+  lines.push(`• ${saquesDom}.`);
+  lines.push(`• ${ganadoresClave}.`);
+  lines.push(`• ${erroresClave}.`);
+  lines.push(`• Acierto A: ${A.acc}% (ganadores ${A.win}, errores ${A.err}) · Acierto B: ${B.acc}% (ganadores ${B.win}, errores ${B.err}).`);
+  lines.push("");
+  lines.push(`⭐ Destacada/o: ${mvp.name} — diferencial ${mvp.diff} (ganadores ${mvp.win}, errores ${mvp.err}, acierto ${mvp.acc}%).`);
+  if (worst.id!==mvp.id){
+    lines.push(`⚠️ A mejorar: ${worst.name} — diferencial ${worst.diff} (ganadores ${worst.win}, errores ${worst.err}, acierto ${worst.acc}%).`);
+  }
+  lines.push("");
+  lines.push(`🧭 Lectura táctica: la dupla ${ganadorTxt===pairA?"A":"B"} administró mejor los puntos largos y supo cerrar juegos clave. El “punto de oro” y el tiebreak inclinaron la balanza cuando había máxima paridad.`);
+  lines.push(`Cierre sólido y autoridad en los momentos calientes para ${ganadorTxt}.`);
+
+  return lines.join("\n");
+}
+function openNarrativeModal(){
+  const txt = generateMatchNarrative();
+  $("#narrativeText").textContent = txt;
+  $("#modalBackdropNarr").classList.add("show");
+  $("#modalNarrative").classList.add("show");
+}
+function closeNarrativeModal(){
+  $("#modalBackdropNarr").classList.remove("show");
+  $("#modalNarrative").classList.remove("show");
+}
+function copyNarrative(){
+  const txt = $("#narrativeText").textContent;
+  navigator.clipboard.writeText(txt).then(()=> alert("Resumen copiado al portapapeles."))
+  .catch(()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch{} document.body.removeChild(ta); alert("Resumen copiado."); });
+}
+
+/* ===== Eventos ===== */
+function startReset(){
+  syncNames();
+  state.meta.setFormat = parseInt($("#setFormat").value,10);
+  state.tiebreakEnabled = !!$("#chkTiebreak").checked;
+  const seq = ($("#serveOrder").value||"A1,B1,A2,B2").split(",").filter(x=>["A1","A2","B1","B2"].includes(x));
+  state.serveOrder = seq.length ? seq : ["A1","B1","A2","B2"];
+
+  state.serveIndex=0;
+  state.mode="game";
+  state.tiebreak={a:0,b:0};
+  state.score={setsA:0,setsB:0,gamesA:0,gamesB:0,ptsA:0,ptsB:0};
+  ["A1","A2","B1","B2"].forEach(id=> state.stats[id]={GG:0,SG:0,ENF:0,FE:0});
+  state.log=[]; state.setHistory=[]; state.undoStack=[]; state.meta.started=true; state.meta.finished=false;
+  state.meta.createdAt=new Date().toISOString(); state.meta.id="match_"+Date.now();
+  state.eventsSinceSave=0; updateServeOrderOptions(); requestRender(); autosave();
+}
+["#pA1","#pA2","#pB1","#pB2"].forEach(sel=>{
+  $(sel).addEventListener("input", ()=>{ syncNames(); updateServeOrderOptions(); requestRender(); });
+});
+$("#actionsGrid").addEventListener("click",(e)=>{
+  const b=e.target.closest("button[data-player][data-action]"); if(!b) return;
+  recordPoint(b.getAttribute("data-player"), b.getAttribute("data-action"));
+});
+
+$("#btnStart").onclick=startReset;
+$("#btnUndo").onclick=undo;
+
+$("#btnEndSet").onclick=()=>{
+  if(!state.meta.started || state.meta.finished) return;
+  if(state.mode==="tiebreak"){ alert("No puedes cerrar manualmente mientras hay un tiebreak en curso."); return; }
+  if(state.score.gamesA===state.score.gamesB){ alert("Empate de juegos: no se puede cerrar el set."); return; }
+  pushUndo();
+  state.setHistory.push({a:state.score.gamesA, b:state.score.gamesB});
+  if(state.score.gamesA>state.score.gamesB) state.score.setsA++; else state.score.setsB++;
+  state.score.gamesA=0; state.score.gamesB=0; resetGamePoints();
+  const targetSets=Math.ceil(state.meta.setFormat/2);
+  if(state.score.setsA===targetSets || state.score.setsB===targetSets) state.meta.finished=true;
+  requestRender(); autosave(); maybeShowNarrativeButton();
+};
+
+$("#btnEndMatch").onclick=()=>{
+  if(!state.meta.started) return;
+  pushUndo();
+  state.meta.finished=true; requestRender(); autosave(); maybeShowNarrativeButton();
+};
+
+$("#btnExport").onclick=()=> downloadCSV(buildCSV(), "doblejotaenlared.csv");
+$("#btnSave").onclick=saveToHistory;
+
+/* Charts */
+$("#btnCharts").onclick=openChartsModal;
+$("#btnCloseModal").onclick=closeChartsModal;
+$("#btnCloseModal2").onclick=closeChartsModal;
+$("#modalBackdrop").onclick=closeChartsModal;
+
+/* Tabla avanzada */
+$("#btnToggleAdv").onclick=()=>{
+  const wrap=$("#advTableWrap");
+  const showing = wrap.style.display!=="none";
+  wrap.style.display = showing ? "none" : "block";
+  $("#btnToggleAdv").textContent = showing ? "📋 Mostrar tabla avanzada" : "📋 Ocultar tabla avanzada";
+  requestRender();
+};
+
+/* Narrativa */
+$("#btnNarrative").onclick=openNarrativeModal;
+$("#btnCloseNarr").onclick=closeNarrativeModal;
+$("#btnCloseNarr2").onclick=closeNarrativeModal;
+$("#modalBackdropNarr").onclick=closeNarrativeModal;
+$("#btnCopyNarr").onclick=copyNarrative;
+
+/* boot */
+(function boot(){
+  updateServeOrderOptions();
+  loadAutosave(); // si existe
+  $("#pA1").value=state.players.A1.name; $("#pA2").value=state.players.A2.name;
+  $("#pB1").value=state.players.B1.name; $("#pB2").value=state.players.B2.name;
+  $("#chkTiebreak").checked = !!state.tiebreakEnabled;
+  updateServeOrderOptions(); requestRender();
+})();
+</script>
+</body>
+</html>
